@@ -285,7 +285,8 @@ void CS_initClockSignal (uint8_t selectedClockSignal,
 
             HWREG16(CS_BASE + OFS_CSCTL2) &= ~(SELS_7);
             HWREG16(CS_BASE + OFS_CSCTL2) |= clockSource;
-            HWREG16(CS_BASE + OFS_CSCTL3) = ((temp) & (~(DIVS0 + DIVS1 + DIVS2)) | (clockSourceDivider));
+            HWREG16(CS_BASE + OFS_CSCTL3) = temp & ~(DIVS0 + DIVS1 + DIVS2) |
+                                                clockSourceDivider;
             break;
         case CS_MCLK:
             assert(

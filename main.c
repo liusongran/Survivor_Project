@@ -1,46 +1,9 @@
-#include <stdio.h>
-#include <msp430.h>			
-#include <profile.h>
-#include "simulator.h"
+#include "main.h"
+#include "mcu.h"
 #include "elk.h"
+
 #include "apps.h"
-#include <stdlib.h>
-#include <time.h>
-
-static void __cs_init(){
-    CS_setDCOFreq(CS_DCORSEL_1, CS_DCOFSEL_4);      //Set DCO frequency to 16MHz
-
-    /**
-     * Configure one FRAM waitstate as required by the device datasheet for MCLK
-     * operation beyond 8MHz _before_ configuring the clock system.
-     */
-    FRCTL0 = FRCTLPW | NWAITS_1;
-
-    CS_initClockSignal(CS_MCLK,CS_DCOCLK_SELECT,CS_CLOCK_DIVIDER_1);
-    CS_initClockSignal(CS_SMCLK,CS_DCOCLK_SELECT,CS_CLOCK_DIVIDER_1);
-    CS_initClockSignal(CS_ACLK,CS_LFXTCLK_SELECT,CS_CLOCK_DIVIDER_1);
-}
-static void __timerA_init(){
-    Timer_A_initContinuousModeParam initContParam = {0};
-    initContParam.clockSource = TIMER_A_CLOCKSOURCE_SMCLK;
-    initContParam.clockSourceDivider = TIMER_A_CLOCKSOURCE_DIVIDER_4;
-    initContParam.timerInterruptEnable_TAIE = TIMER_A_TAIE_INTERRUPT_DISABLE;
-    initContParam.timerClear = TIMER_A_DO_CLEAR;
-    initContParam.startTimer = false;
-    Timer_A_initContinuousMode(TIMER_A1_BASE, &initContParam);
-}
-
-void __mcu_init(){
-    WDTCTL = WDTPW | WDTHOLD;       //Stop watchdog.
-    PM5CTL0 &= ~LOCKLPM5;           //Disable the GPIO power-on default high-impedance mode.
-
-    P1DIR = 0x3F;                   //0b-0011 1111
-    P1OUT = 0x00;
-    __delay_cycles(10);
-    P1OUT = 0b010011;               //Set P1.4, Turn both LEDs on
-
-    __cs_init();                    //Clock system
-}
+#include "profile.h"
 
 
 extern int64_t _chg_curBgt;
@@ -67,10 +30,10 @@ extern int32_t checkPeriod;
 extern uint8_t fail_flag;
 extern uint32_t nvFailedNum;
 
+
+
 static void __chg_bgt_get(){
     _chg_curBgt = ON_PERIOD;
-
-
 /*
     while(_chg_num>FAIL_NUM){
         //printk("--||Total APP num:%d.\r\n",roundNum);
@@ -150,7 +113,6 @@ if(_chg_curBgt<delta){
 
 #ifdef ELK
             if(!nvInited&&!testFlg){
-                //__simu_init();
                 __elk_init();
                 ENTER_CRITICAL
             }
@@ -202,10 +164,10 @@ if(_chg_curBgt<delta){
     total += delta;
     _chg_curBgt -= delta;
 }*/
-	        __scheduler_run();          //kick-off run-time system.
+            __scheduler_run();          //kick-off run-time system.
         }
     }
 
-    //printk("[ERROR] Should not reach here!\r\n");
-    //return 0;
+    printk("[ERROR] Should not reach here!\r\n");
+    return 0;
 }

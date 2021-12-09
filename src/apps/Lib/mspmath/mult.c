@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include <msp-math.h>
+#include <./src/apps/Lib/mspmath/msp-math.h>
 
 // NOTE: This is not implemented as a built-in in libmspbuiltins because Clang
 // doesn't issue calls to operations where result type is different from

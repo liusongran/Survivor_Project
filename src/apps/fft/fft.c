@@ -1,6 +1,6 @@
 #include <task.h>
 //#include <mspbase.h>
-#include <DSPLib.h>
+#include <./src/apps/Lib/dsplib/include/DSPLib.h>
 #include <apps.h>
 
 #define N_SAMPLES     128

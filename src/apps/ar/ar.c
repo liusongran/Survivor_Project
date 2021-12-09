@@ -1,8 +1,8 @@
 #include <task.h>
 
 #include <apps.h>
-#include <accel.h>
-#include <msp-math.h>
+#include <./src/apps/Lib/accel.h>
+#include <./src/apps/Lib/mspmath/msp-math.h>
 
 unsigned _v_seed;
 

@@ -1,7 +1,7 @@
 #include <task.h>
 #include <apps.h>
 #include <math.h>
-#include "msp-math.h"
+#include "./src/apps/Lib/mspmath/msp-math.h"
 
 #define MSG "Let's Go, Celtics!! Fighting for the NBA championship!!"
 #define MSG_LEN 10
