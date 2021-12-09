@@ -1,5 +1,5 @@
 # Survivor: Surviving Transient Power Failures with SRAM Data Retention
-Survivor is a task-based programming and executing model for energy-harvesting battery-less devices. Survivor applications should be written as a chain of tasks. Survivor runtime library protects applications data against power interrupts with SRAM data retention feature.
+Survivor is a task-based programming and executing model for energy-harvesting battery-less devices. Survivor applications should be written as a chain of tasks. Survivor runtime library protects applications data against power interrupts with SRAM data retention feature. For more technical details, please refer to our paper.
 
 ## Programming interface
 - A Survivor's task should be declared as
