@@ -13,4 +13,4 @@ Survivor is a task-based programming and executing model for energy-harvesting b
 
 ## Reference
 <div id="refer-anchor-1"></div>
-- [1] [Liu, Songran, et al. "Surviving Transient Power Failures with SRAM Data Retention." 2021 Design, Automation & Test in Europe Conference & Exhibition (DATE). IEEE, 2021.]
+[1] Liu, Songran, et al. "Surviving Transient Power Failures with SRAM Data Retention." 2021 Design, Automation & Test in Europe Conference & Exhibition (DATE). IEEE, 2021.
