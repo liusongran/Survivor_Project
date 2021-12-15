@@ -176,8 +176,18 @@ SECTIONS
 
 #ifndef __LARGE_DATA_MODEL__
     .const            : {} > FRAM           /* Constant data                     */
+    .nv_vars          : {} > FRAM
+    .elk_vars         : {} > FRAM
+    .elk_cst_vars     : {} > FRAM
+    .elk_glbal_vars   : {} > FRAM
+    .elk_sub_cksum    : {} > FRAM
 #else
     .const            : {} >> FRAM | FRAM2  /* Constant data                     */
+   	.nv_vars          : {} > FRAM
+    .elk_vars         : {} > FRAM
+    .elk_cst_vars     : {} > FRAM
+    .elk_glbal_vars   : {} > FRAM
+    .elk_sub_cksum    : {} > FRAM
 #endif
 
 #ifndef __LARGE_CODE_MODEL__

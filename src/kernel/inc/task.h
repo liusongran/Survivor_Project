@@ -2,12 +2,13 @@
 #include <stdint.h>
 #include "apps.h"
 #include <string.h>
+#include "elk.h"
 
 #define MAX_TASK_NUM        APP_TASK_NUM
 #define PRIORITY_LEV        1
 #define MAX_THREAD_NUM      PRIORITY_LEV
 
-#define __nv __attribute__((section(".TI.persistent")))
+//#define __nv __attribute__((section(".TI.persistent")))
 
 typedef struct {
     uint16_t nvCksumTemp;
@@ -61,7 +62,7 @@ typedef uint8_t (*taskfun_t) (buffer_t *);
         typedef struct {    \
             __VA_ARGS__     \
         } SRAM_data_t  __attribute__ ((aligned (2)));    \
-        static SRAM_data_t __persistent_vars[2];        //TODO: glbal
+        __nv static SRAM_data_t __persistent_vars[2];        //TODO: glbal
 
 /** Declare a TASK. */
 #define TASK(name)  static uint8_t name(void *__buffer)
