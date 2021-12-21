@@ -34,5 +34,7 @@ encoding//Debug/src/apps/sort/subdir_rules.mk=UTF-8
 encoding//Debug/src/apps/sort/subdir_vars.mk=UTF-8
 encoding//Debug/src/kernel/elk/subdir_rules.mk=UTF-8
 encoding//Debug/src/kernel/elk/subdir_vars.mk=UTF-8
+encoding//Debug/src/kernel/elk_plus/subdir_rules.mk=UTF-8
+encoding//Debug/src/kernel/elk_plus/subdir_vars.mk=UTF-8
 encoding//Debug/subdir_rules.mk=UTF-8
 encoding//Debug/subdir_vars.mk=UTF-8

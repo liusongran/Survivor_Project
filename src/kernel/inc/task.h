@@ -4,11 +4,9 @@
 #include <string.h>
 #include "elk.h"
 
-#define MAX_TASK_NUM        APP_TASK_NUM
-#define PRIORITY_LEV        1
-#define MAX_THREAD_NUM      PRIORITY_LEV
-
-//#define __nv __attribute__((section(".TI.persistent")))
+/**
+ * Structures
+ */
 
 typedef struct {
     uint16_t nvCksumTemp;
@@ -38,6 +36,22 @@ typedef struct {
     uint16_t start_used_offset;                 //start
     uint16_t end_used_offset;                   //end
 }ck_set_t;
+
+/** a memory region */
+typedef struct {
+    uint8_t  regAccessed;                   // flag to show this region is accessed in this round or not
+    uint16_t regStartOffset;                  // start address of this region
+    uint16_t regEndOffset;                       // size, in word (2bytes)
+    uint16_t regCksum;                      // checksum of this region
+}mem_region_t;
+
+
+/** whole protected memory region for this APP */
+typedef struct {
+    uint16_t wholeStartAddr;                // start addr.
+    uint16_t wholeSize;                     // whole protected memory size, in word (2bytes)
+    mem_region_t wholeMem[APP_REGION_NUM];
+}whole_mem_t;
 
 /** The main task structure for each Task. */
 typedef struct {
