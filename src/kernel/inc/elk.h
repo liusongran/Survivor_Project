@@ -25,6 +25,10 @@
 //#define NULL ((void *)0)
 
 extern uint16_t nvInited;
+extern uint8_t  elkCurMode;
+extern uint8_t  elkCurMode;
+extern uint8_t  elkClearMark;
+
 
 void __elk_backup(uint8_t priority, uint8_t taskID);
 void __elk_checksum(uint8_t priority, uint8_t taskID);

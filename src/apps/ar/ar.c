@@ -351,7 +351,7 @@ void _benchmark_ar_init(){
 #ifdef ELK
         __THREAD_DUMMY(0, elkBufIdx._idx);
 #endif
-#ifdef TOTAL
+#ifdef TOTALRECALL
         __THREAD(0);
 #endif
     }

@@ -6,40 +6,39 @@
 #include "list.h"
 #include "dma.h"
 #include "profile.h"
+#include "config.h"
+#include "simulation.h"
 
+/** Public */
 __elk uint16_t  nvInited = 0;
 __elk uint8_t   elkCurMode = 0;                       //0->normal, 1->intermittent
 __elk uint8_t   elkClearMark = 0;                     //0->normal, 1-start to clear
 __elk uint16_t  elkTotalCksum;
-
-__elk_du list_node_t    elkListNodes[MAX_SUB_CKSUM_NUM];
-__elk_du elk_list_t     elkDualList[2];
-
-__nv uint16_t   elkNodeBitmaps[3];                    //0:backup, 1:working, 2:this-round
 __nv uint8_t    elkCurTaskID = 0;                      //this in elk
 __nv buffer_idx_t elkBufIdx;                        //this to nv
-
 __nv int crcSeed = 0xBEEF;
-__nv uint16_t nvTotalCksum;
-__nv uint16_t nvListSize = sizeof(elk_list_t);
-__nv uint16_t nvBufSize=0;
 __nv thread_t _threads[MAX_THREAD_NUM];
-
+uint16_t nvCksumTab[MAX_CKSUM_TAB_NUM];     //todo:
 __sv uint16_t svVrfiedBp = 0;                       //verified bitmap
 __sv uint8_t  svIntervalNum = 0;                    //temp valid interval number
-__sv ck_set_t svIntvlArray[MAX_TASK_NUM] = {0};     //temp interval array
-__sv uint16_t svMergeBp = 0;                        //merged bitmap
 __sv uint16_t svMarkedBp = 0;                       //marked node bitmap
-
-uint16_t nvCksumTab[MAX_CKSUM_TAB_NUM];     //todo:
-
-__nv uint16_t tempRndCntr=0;
 __nv uint16_t nvTaskNum = 0;
 __nv uint32_t nvFailedNum = 0;
 
+
+/** Private */
+__elk_du list_node_t    elkListNodes[MAX_SUB_CKSUM_NUM];
+__elk_du elk_list_t     elkDualList[2];
+__nv uint16_t   elkNodeBitmaps[3];                    //0:backup, 1:working, 2:this-round
+__nv uint16_t nvTotalCksum;
+__nv uint16_t nvListSize = sizeof(elk_list_t);
+__nv uint16_t nvBufSize=0;
+__sv ck_set_t svIntvlArray[MAX_TASK_NUM] = {0};     //temp interval array
+__sv uint16_t svMergeBp = 0;                        //merged bitmap
+__nv uint16_t tempRndCntr=0;
 __nv uint8_t bgtFlag = 0;
 
-
+extern uint16_t _chg_num;
 __nv uint16_t crcPrfStart = 0;
 __nv uint16_t crcPrfEnd = 0;
 __nv uint64_t crcPrfSum = 0;
@@ -690,48 +689,7 @@ inline void __elk_commit(uint8_t tempTaskID, cksum_temp_t tempCksum) {
  * [__scheduler_run]: done!!
  * LOG: scheduler of ELK.
  */
-#ifdef DEBUG
-__nv uint16_t backupStart = 0;
-__nv uint16_t backupEnd = 0;
-__nv uint64_t backupSum = 0;
-
-__nv uint16_t updateStart = 0;
-__nv uint16_t updateEnd = 0;
-__nv uint64_t updateSum = 0;
-
-__nv uint16_t cksumStart = 0;
-__nv uint16_t cksumEnd = 0;
-__nv uint64_t cksumSum = 0;
-
-__nv uint16_t verifyStart = 0;
-__nv uint16_t verifyEnd = 0;
-__nv uint64_t verifySum = 0;
-
-__nv uint16_t markStart = 0;
-__nv uint16_t markEnd = 0;
-__nv uint64_t markSum = 0;
-
-__nv uint16_t taskStart = 0;
-__nv uint16_t taskEnd = 0;
-__nv uint64_t taskSum = 0;
-
-__nv uint16_t initStart = 0;
-__nv uint16_t initEnd = 0;
-__nv uint64_t initSum = 0;
-
-__nv uint64_t total = 0;
-__nv int64_t _chg_curBgt = 0;
-extern uint16_t _chg_num;
-__nv uint16_t roundNum = 0;
-__nv uint8_t testFlg = 0;
-
-__nv uint8_t fail_flag = 0;
-__nv int16_t calbriBgt=0;
-__nv int32_t checkPeriod = 0;
-#endif
-
-
-void __scheduler_run() {
+void __scheduler_run(){
     uint8_t tempResult;
     volatile uint8_t tempTaskID;
     cksum_temp_t tempCksum;
@@ -739,129 +697,68 @@ void __scheduler_run() {
     while(1){
 #ifdef ELK
         if(nvInited){//branch-1 ---> system is already booted.
-PRB_START(verify)
+PRB_START_P(verify)
             tempResult = __elk_verify(0,elkCurTaskID);      //NOTE: Step1
-PRB_END(verify)
-if(_chg_curBgt<delta){
-    total += _chg_curBgt;
-    verifySum = verifySum-delta+_chg_curBgt;
-    _chg_curBgt = 0;
-    break;
-}else{
-    total += delta;
-    _chg_curBgt -= delta;
-}
+PRB_END_P(verify)
             if(tempResult==VERIFY_FAILED){
                 nvInited = 0;
                 break;
             }
-        }
-        
-PRB_START(backup)
+        }    
+PRB_START_P(backup)
             __elk_backup(0, elkCurTaskID);                  //NOTE: Step2
-PRB_END(backup)
-if(_chg_curBgt<delta){
-    total += _chg_curBgt;
-    updateSum = updateSum-delta+_chg_curBgt;
-    _chg_curBgt = 0;
-    break;
-}else{
-    total += delta;
-    _chg_curBgt -= delta;
-}
-#ifdef TRACE
+PRB_END_P(backup)
+
+#ifdef PROFILE_TASK
             printk("task%d: ",elkCurTaskID);
 #endif
-PRB_START(task)
+PRB_START_P(task)
             tempTaskID = (uint8_t)((taskfun_t)(_threads[0].task_array[elkCurTaskID].fun_entry))(_threads[0].buffer.buf[elkBufIdx._idx]);
-PRB_END(task)
+PRB_END_P(task)
             nvTaskNum++;
-//taskSum += delta;
-#ifdef TRACE
+
+#ifdef PROFILE_TASK
             printk("%lu.\r\n",delta);
 #endif
-if(_chg_curBgt<delta){
-    total += _chg_curBgt;
-    taskSum = taskSum-delta+_chg_curBgt;
-    _chg_curBgt = 0;
-    break;
-}else{
-    total += delta;
-    _chg_curBgt -= delta;
-}
 
-PRB_START(cksum)
+PRB_START_P(cksum)
             if(nvInited){
-                __elk_checksum(0,elkCurTaskID);                 //NOTE: Step3
+                __elk_checksum(0,elkCurTaskID);             //NOTE: Step3
             }else{
                 __elk_first_cksum();
                 nvInited = 1;
             }
-PRB_END(cksum)
-if(_chg_curBgt<delta){
-    total += _chg_curBgt;
-    cksumSum = cksumSum-delta+_chg_curBgt;
-    _chg_curBgt = 0;
-    break;
-}else{
-    total += delta;
-    _chg_curBgt -= delta;
-}
+PRB_END_P(cksum)
 
 PRB_START(update)
             tempCksum = __elk_update_nv();                  //NOTE: Step4
-PRB_END(update)
-if(_chg_curBgt<delta){
-    total += _chg_curBgt;
-    cksumSum = cksumSum-delta+_chg_curBgt;
-    _chg_curBgt = 0;
-    break;
-}else{
-    total += delta;
-    _chg_curBgt -= delta;
-}
-
             __elk_commit(tempTaskID, tempCksum);            //NOTE: Step5
+PRB_END(update)
 #endif
-
         if(elkCurTaskID==0){
-            P1OUT = 0b100011;                   //set P1.5, clear P1.4
+            P1OUT = 0b100011;                               //set P1.5, clear P1.4
             testFlg = 1;
             roundNum++;
-#ifdef DEBUG
-            if(roundNum<ITER){
+            if(roundNum<SIMU_ITERATION){
                 printk("|APP num:%d.\r\n",roundNum);
-#if TRACE_CRC_TIME
+#if PROFILE_CRC_TIME
                 printk("|CRCprf:%u(100us)\r\n",  (uint32_t)(crcPrfSum)/100);
-#elif TRACE_CRC
+#elif PROFILE_CRC_SIZE
                 printk("|Total size: %lu(bytes).\r\n", (uint32_t) crcSizeSum);
 #else
                 printk("|InitSum:%lu(100us)\r\n",    (uint32_t)(initSum)/100);
                 printk("|BackupSum:%lu(100us)\r\n",  (uint32_t)(backupSum)/100);
                 printk("|CksumSum:%lu(100us)\r\n",   (uint32_t)(cksumSum)/100);
                 printk("|UpdateSum:%lu(100us)\r\n",  (uint32_t)(updateSum)/100);
-                printk("|TaskSum:%lu(100us), ",      (uint32_t)taskSum/100);          printk("num:%d.\r\n",nvTaskNum);
+                printk("|TaskSum:%lu(100us), ",      (uint32_t)taskSum/100);    printk("num:%d.\r\n",nvTaskNum);
                 printk("|VerifySum:%lu(100us)\r\n",  (uint32_t)(verifySum)/100);
                 printk("|Total:%lu(100us)\r\n",(uint32_t)(total)/100);
                 while(1);
-
 #endif
             }
-            //backupSum = 0;
-            //crcPrfSum = 0;
-            //crcSizeSum = 0;
-            //cksumSum = 0;
-            //updateSum = 0;
-            //taskSum = 0;
-            //markSum = 0;
-            //verifySum = 0;
-            //initSum = 0;
             tempRndCntr++;
-            //nvTaskNum = 0;
-            //total = 0;
-#endif
             __delay_cycles(100);
-            P1OUT = 0b010000;                   //set P1.4, clear P1.5
+            P1OUT = 0b010000;                               //set P1.4, clear P1.5
             break;
         }
     }
@@ -875,40 +772,39 @@ if(_chg_curBgt<delta){
  */
 void __elk_init() {
     //printk("__elk_init() is called.\r\n");
-    nvInited = 0;                   // To un-booted
-    elkCurMode = 0;                 // To normal-mode
-    elkClearMark = 1;               // To need-clear
-    elkCurTaskID = 0;               // To the-first-TASK-ID
+    nvInited        = 0;                // To un-booted
+    elkCurMode      = 0;                // To normal-mode
+    elkClearMark    = 1;                // To need-clear
+    elkCurTaskID    = 0;                // To the-first-TASK-ID
 
-    svVrfiedBp = 0;                 // To clear-verified-bitmap, also should clear in power-on ISR.
-    svIntervalNum = 0;              // To clear-interval-number, also should clear in power-on ISR.
-    svMarkedBp = 0;                 // To clear-marked-bitmap, also should clear in power-on ISR.
+    svVrfiedBp      = 0;                // To clear-verified-bitmap, also should clear in power-on ISR.
+    svIntervalNum   = 0;                // To clear-interval-number, also should clear in power-on ISR.
+    svMarkedBp      = 0;                // To clear-marked-bitmap, also should clear in power-on ISR.
 
-    nvTaskNum = 0;
+    nvTaskNum       = 0;
     nvFailedNum++;
     //Dual-list init.
     _elk_listInit(&elkDualList[0]);
     _elk_listInit(&elkDualList[1]);
 
     //Buffer-Idx init. Backup->0, Working->1
-    elkBufIdx.idx = 0;
-    elkBufIdx._idx = 1;
+    elkBufIdx.idx   = 0;
+    elkBufIdx._idx  = 1;
 
     //List-node bitmap init.
     elkNodeBitmaps[0] = 0;
     elkNodeBitmaps[1] = 0;
     elkNodeBitmaps[2] = 0;
 
-#ifdef DEBUG
-    backupSum = 0;
-    cksumSum = 0;
-    updateSum = 0;
-    taskSum = 0;
-    markSum = 0;
-    verifySum = 0;
+#ifdef PROFILE_ENABLE
+    backupSum       = 0;
+    cksumSum        = 0;
+    updateSum       = 0;
+    taskSum         = 0;
+    markSum         = 0;
+    verifySum       = 0;
 #endif
 }
-
 
 /* -------------
  * [__total_cksum_nv]: done!!
@@ -917,12 +813,12 @@ void __elk_init() {
 void __total_cksum_nv(){
     int i,j;
     HWREG16(CRC_BASE + OFS_CRCINIRES) = crcSeed;
-    for(j=0;j<SSIZE;j++){
-    for(i=0;i<(SRAM_SIZE+128);i=i+2){
-        HWREG16(CRC_BASE + OFS_CRCDI) = HWREG16(SRAM_START+i);
+    for(j=0;j<CFG_SSIZE;j++){
+    for(i=0;i<(CFG_SRAM_SIZE+128);i=i+2){
+        HWREG16(CRC_BASE + OFS_CRCDI) = HWREG16(CFG_SRAM_START+i);
     }
     }
-    //crcSizeSum += SRAM_SIZE*SSIZE;
+    //crcSizeSum += SRAM_SIZE*SSCFG_SSIZEIZE;
     nvTotalCksum = HWREG16(CRC_BASE + OFS_CRCINIRES);
 }
 
@@ -930,12 +826,12 @@ uint16_t __total_verify_nv(){
     int i,j;
     uint16_t tempCksum;
     HWREG16(CRC_BASE + OFS_CRCINIRES) = crcSeed;
-    for(j=0;j<SSIZE;j++){
-    for(i=0;i<(SRAM_SIZE+128);i=i+2){
-        HWREG16(CRC_BASE + OFS_CRCDI) = HWREG16(SRAM_START+i);
+    for(j=0;j<CFG_SSIZE;j++){
+    for(i=0;i<(CFG_SRAM_SIZE+128);i=i+2){
+        HWREG16(CRC_BASE + OFS_CRCDI) = HWREG16(CFG_SRAM_START+i);
     }
     }
-    //crcSizeSum += SRAM_SIZE*SSIZE;
+    //crcSizeSum += SRAM_SIZE*CFG_SSIZE;
     tempCksum = HWREG16(CRC_BASE + OFS_CRCINIRES);
     if(tempCksum==nvTotalCksum){
         return VERIFY_PASS;

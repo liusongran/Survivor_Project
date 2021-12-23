@@ -1,13 +1,11 @@
 #include "main.h"
-#include "mcu.h"
-#include "elk.h"
-
 #include "apps.h"
+#include "elk.h"
+#include "simulation.h"
 #include "profile.h"
 
-
-extern int64_t _chg_curBgt;
-extern uint16_t initStart;
+extern int64_t  _chg_curBgt;
+extern uint16_t initStart;      
 extern uint16_t initEnd;
 extern uint64_t initSum;
 
@@ -16,7 +14,6 @@ extern int16_t calbriBgt;
 extern uint32_t delta;
 extern uint64_t total;
 
-extern uint8_t elkCurMode;
 extern uint8_t svIntervalNum;
 extern uint16_t svVrfiedBp;
 extern uint16_t svMarkedBp;
@@ -33,15 +30,9 @@ extern uint32_t nvFailedNum;
 
 
 static void __chg_bgt_get(){
-    _chg_curBgt = ON_PERIOD;
-/*
-    while(_chg_num>FAIL_NUM){
-        //printk("--||Total APP num:%d.\r\n",roundNum);
-        //printk("--||Failed APP num:%lu.\r\n",nvFailedNum);
-        while(1);
-    }*/
+    _chg_curBgt = SIMU_ON_PERIOD;
     _chg_num++;
-#ifdef TOTAL
+#ifdef TOTALRECALL
     checkPeriod = CKSUM_FRQ;
 #endif
 }
@@ -51,19 +42,19 @@ extern uint16_t nvTaskNum;
 
 int main(void){
     __mcu_init();
-    UART_initGPIO();
-    UART_init();
+    __gpio_init();
+    __uart_init();
     __timerA_init();
 
     while(1){
         __chg_bgt_get();
 
         if(nvInited){
-#ifdef TOTAL
+#ifdef TOTALRECALL
 //PRB_START(init)
            // __total_verify_nv();
 //PRB_END(init)
-            //delta = 2500*((uint32_t)(SSIZE>>3));
+            //delta = 2500*((uint32_t)(CFG_SSIZE>>3));
             delta = 0;
 if(_chg_curBgt<delta){
     total += _chg_curBgt;
@@ -119,7 +110,7 @@ if(_chg_curBgt<delta){
 #endif
             if(!nvInited||testFlg){
                 testFlg = 0;
-#ifdef TOTAL
+#ifdef TOTALRECALL
                 elkCurTaskID = 0;
                 taskSum = 0;
                 nvTaskNum = 0;
@@ -155,19 +146,10 @@ if(_chg_curBgt<delta){
                 _benchmark_adpcm_init();
 #endif
             }
-/*PRB_END(init)
-if(_chg_curBgt<delta){
-    total += _chg_curBgt;
-    _chg_curBgt = 0;
-    break;
-}else{
-    total += delta;
-    _chg_curBgt -= delta;
-}*/
+
             __scheduler_run();          //kick-off run-time system.
         }
     }
-
     printk("[ERROR] Should not reach here!\r\n");
     return 0;
 }
