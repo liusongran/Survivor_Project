@@ -5,14 +5,8 @@
 #include "profile.h"
 
 extern int64_t  _chg_curBgt;
-extern uint16_t initStart;      
-extern uint16_t initEnd;
-extern uint64_t initSum;
 
 extern int16_t calbriBgt;
-
-extern uint32_t delta;
-extern uint64_t total;
 
 extern uint8_t svIntervalNum;
 extern uint16_t svVrfiedBp;
@@ -51,10 +45,6 @@ int main(void){
 
         if(nvInited){
 #ifdef TOTALRECALL
-//PRB_START(init)
-           // __total_verify_nv();
-//PRB_END(init)
-            //delta = 2500*((uint32_t)(CFG_SSIZE>>3));
             delta = 0;
 if(_chg_curBgt<delta){
     total += _chg_curBgt;
@@ -100,7 +90,6 @@ if(_chg_curBgt<delta){
             if(_chg_curBgt<=0){
                 break;
             }
-//PRB_START(init)
 
 #ifdef ELK
             if(!nvInited&&!testFlg){

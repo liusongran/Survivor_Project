@@ -26,7 +26,6 @@
 
 extern uint16_t nvInited;
 extern uint8_t  elkCurMode;
-extern uint8_t  elkCurMode;
 extern uint8_t  elkClearMark;
 
 
@@ -46,3 +45,12 @@ void __elk_crc_table_gen();
 
 uint16_t __total_verify_nv();
 void __total_cksum_nv();
+
+/**
+ * ELK_PLUS API
+ */
+
+void __elk_plus_init_access();
+void __elk_plus_init_mem(uint16_t wholeStartAddr, uint16_t wholeSize);
+bool __elk_plus_verify(uint16_t idxI, uint16_t idxJ);
+void __elk_plus_cksum();

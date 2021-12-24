@@ -95,14 +95,20 @@ void __init_task(uint8_t priority, void *task_entry, uint16_t start_used_offset,
 /** Point to next TASK's ID. */
 #define NEXT(id)  return (uint16_t)id
 
-/** Creates a thread. */
+/** Create a thread. */
 void __create_thread(uint8_t priority, void *data_org, void *data_temp, uint16_t size);
 #define __THREAD(priority)  \
-        __create_thread(priority, (void *)&__persistent_vars[0], (void *)&__persistent_vars[1], sizeof(SRAM_data_t));  \
-        memset((void *)&__persistent_vars[1], 0, sizeof(SRAM_data_t));\
-        memset((void *)&__persistent_vars[0], 0, sizeof(SRAM_data_t))
-        //memset((void *)&__persistent_vars[1], 0, sizeof(SRAM_data_t))
+        __create_thread(priority, (void *)&__persistent_vars[0], (void *)&__persistent_vars[1], sizeof(SRAM_data_t));   \
+        memset((void *)&__persistent_vars[1], 0, sizeof(SRAM_data_t));                                                  \
+        memset((void *)&__persistent_vars[0], 0, sizeof(SRAM_data_t));                                                  \
+        __elk_plus_init_mem((uint16_t)&__persistent_vars, sizeof(SRAM_data_t))
 
 #define __THREAD_DUMMY(priority, idx)  \
         __create_thread(priority, (void *)&__persistent_vars[0], (void *)&__persistent_vars[1], sizeof(SRAM_data_t));  \
         memset((void *)&__persistent_vars[idx], 0, sizeof(SRAM_data_t));
+
+/** Declare protected memory region. */
+
+
+
+

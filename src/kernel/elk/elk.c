@@ -2,6 +2,7 @@
 #include <driverlib.h>
 
 #include "elk.h"
+#include "elk_lib.h"
 #include "task.h"
 #include "list.h"
 #include "dma.h"
@@ -39,10 +40,6 @@ __nv uint16_t tempRndCntr=0;
 __nv uint8_t bgtFlag = 0;
 
 extern uint16_t _chg_num;
-__nv uint16_t crcPrfStart = 0;
-__nv uint16_t crcPrfEnd = 0;
-__nv uint64_t crcPrfSum = 0;
-uint32_t delta = 0;
 
 uint32_t crcSizeSum = 0;
 /* ------------------
@@ -556,9 +553,9 @@ void __elk_mark(uint8_t priority, uint8_t taskID) {
  * 2. update nodeBitmap[working_buffer];
  * 3. calculate the whole cksum;
  */
-void __elk_first_cksum() {
+void __elk_first_cksum(){
     uint8_t workingBufIdx = elkBufIdx._idx;
-    elkNodeBitmaps[workingBufIdx] = 1;              //use node 0 in elkListNodes[]
+    elkNodeBitmaps[workingBufIdx] = 1;                      //use node 0 in elkListNodes[]
     _elk_listFirstAdd(&elkDualList[workingBufIdx], 0);
     elkListNodes[0].intvlStart = 0;                         //in byte
     elkListNodes[0].intvlEnd = _threads[0].buffer.size-1;   //in byte

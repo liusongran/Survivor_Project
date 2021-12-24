@@ -31,6 +31,7 @@ __nv uint16_t initEnd     = 0;
 __nv uint64_t initSum     = 0;
 
 __nv uint64_t total       = 0;
+__nv uint32_t delta       = 0;
 __nv int64_t _chg_curBgt  = 0;
 __nv uint16_t roundNum    = 0;
 __nv uint8_t testFlg      = 0;

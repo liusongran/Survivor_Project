@@ -14,10 +14,10 @@
  * APP SELECTION FOR USER:
  */
 
-//#define SRT
+#define SRT
 //#define AR
 //#define DIJ
-#define BC
+//#define BC
 //#define RSA
 //#define CK
 //#define CEM

@@ -108,6 +108,7 @@ extern uint16_t initEnd     ;
 extern uint64_t initSum     ;
 
 extern uint64_t total       ;
+extern uint32_t delta       ;
 extern int64_t _chg_curBgt  ;
 extern uint16_t roundNum    ;
 extern uint8_t testFlg      ;
