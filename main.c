@@ -4,9 +4,7 @@
 #include "simulation.h"
 #include "profile.h"
 
-extern int64_t  _chg_curBgt;
 
-extern int16_t calbriBgt;
 
 extern uint8_t svIntervalNum;
 extern uint16_t svVrfiedBp;
@@ -75,14 +73,6 @@ PRB_START(init)
                 testFlg=0;
             }
 PRB_END(init)
-if(_chg_curBgt<delta){
-    total += _chg_curBgt;
-    _chg_curBgt = 0;
-    break;
-}else{
-    total += delta;
-    _chg_curBgt -= delta;
-}
 #endif
         }
 

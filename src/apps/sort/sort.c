@@ -98,7 +98,7 @@ extern buffer_idx_t elkBufIdx;
  */
 void _benchmark_sort_init(){
     if(!nvInited){
-        __THREAD(0);
+        __THREAD(0, 15, 190);
 
         TASK_INIT(0, task_setup, 0, 3);
         TASK_INIT(0, task_init,         0,      155);   //0 - [0,205]
@@ -106,6 +106,6 @@ void _benchmark_sort_init(){
         //TASK_INIT(0, task_outer_loop,   300,    303);   //2 - [200,203]
         TASK_INIT(0, task_finish,       0,      3);     //3 - [0,0]
     }else{
-        __THREAD_DUMMY(0, elkBufIdx._idx);
+        __THREAD_DUMMY(0, 15, 190, elkBufIdx._idx);
     }
 }

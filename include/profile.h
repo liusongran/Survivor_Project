@@ -19,7 +19,7 @@
 
 /** Probes definition */
 #ifdef PROFILE_ENABLE
-#define PRB_START(var)                                                  \ 
+#define PRB_START(var)                                                  \
         Timer_A_startCounter( TIMER_A1_BASE, TIMER_A_CONTINUOUS_MODE ); \
         var##Start = Timer_A_getCounterValue(TIMER_A1_BASE);
 
@@ -35,7 +35,15 @@
         Timer_A_stop(TIMER_A1_BASE);                            \
         Timer_A_clear(TIMER_A1_BASE);                           \
         delta = (var##End-var##Start)>>2;                       \
-        var##Sum += delta;                                      
+        var##Sum += delta;                                      \
+        if(_chg_curBgt<delta){                                  \
+                total += _chg_curBgt;                           \
+                _chg_curBgt = 0;                                \
+                break;                                          \
+        }else{                                                  \
+                total += delta;                                 \
+                _chg_curBgt -= delta;                           \
+        }
         //printk("[%s]:%d(us)\r\n",#var,delta);
 
 #define PRB_END_P(var)                                          \

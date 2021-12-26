@@ -31,25 +31,22 @@ typedef struct {
 
 /** Var info for each Task. */
 typedef struct {
-    //uint16_t idxset_used_var;   //index of used vars for each task.
-    //uint16_t idxset_wrt_var;    //index of write vars for each task.
     uint16_t start_used_offset;                 //start
     uint16_t end_used_offset;                   //end
 }ck_set_t;
 
 /** a memory region */
 typedef struct {
-    uint8_t  regAccessed;                   // flag to show this region is accessed in this round or not
-    uint16_t regStartOffset;                  // start address of this region
-    uint16_t regEndOffset;                       // size, in word (2bytes)
-    uint16_t regCksum;                      // checksum of this region
+    uint8_t  regAccessed;                       // flag to show this region is accessed in this round or not
+    uint16_t regStartOffset;                    // start address of this region
+    uint16_t regEndOffset;                      // size, in word (2bytes)
+    uint16_t regCksum[2];                       // checksum of this region
 }mem_region_t;
-
 
 /** whole protected memory region for this APP */
 typedef struct {
-    uint16_t wholeStartAddr;                // start addr.
-    uint16_t wholeSize;                     // whole protected memory size, in word (2bytes)
+    uint16_t wholeStartAddr;                    // start addr.
+    uint16_t wholeSize;                         // whole protected memory size, in word (2bytes)
     mem_region_t wholeMem[APP_REGION_NUM];
 }whole_mem_t;
 
@@ -62,21 +59,25 @@ typedef struct {
 
 /** the main thread structure that holds all necessary info. */
 typedef struct {
-    uint8_t priority;                           //thread priority (unique)
-    buffer_t buffer;                            //holds task shared persistent variables
+    int8_t priority;                           //thread priority (unique)
     uint8_t idx_of_first_empty_task;
     task_t task_array[MAX_TASK_NUM];
+    buffer_t buffer;                            //holds task shared persistent variables
+    whole_mem_t protected_mem;
 }thread_t;
 
 /** The task definition (single C function). */
 typedef uint8_t (*taskfun_t) (buffer_t *);
 
+/** Declared variables */
+extern thread_t _threads[MAX_THREAD_NUM];
+
 /** Allocates a double buffer for the persistent variables in SRAM. */
-#define __shared(...)   \
-        typedef struct {    \
-            __VA_ARGS__     \
-        } SRAM_data_t  __attribute__ ((aligned (2)));    \
-        __nv static SRAM_data_t __persistent_vars[2];        //TODO: glbal
+#define __shared(...)                                   \
+        typedef struct {                                \
+            __VA_ARGS__                                 \
+        } SRAM_data_t  __attribute__ ((aligned (2)));   \
+        __elk static SRAM_data_t __persistent_vars[2];
 
 /** Declare a TASK. */
 #define TASK(name)  static uint8_t name(void *__buffer)
@@ -96,19 +97,19 @@ void __init_task(uint8_t priority, void *task_entry, uint16_t start_used_offset,
 #define NEXT(id)  return (uint16_t)id
 
 /** Create a thread. */
-void __create_thread(uint8_t priority, void *data_org, void *data_temp, uint16_t size);
-#define __THREAD(priority)  \
-        __create_thread(priority, (void *)&__persistent_vars[0], (void *)&__persistent_vars[1], sizeof(SRAM_data_t));   \
-        memset((void *)&__persistent_vars[1], 0, sizeof(SRAM_data_t));                                                  \
-        memset((void *)&__persistent_vars[0], 0, sizeof(SRAM_data_t));                                                  \
-        __elk_plus_init_mem((uint16_t)&__persistent_vars, sizeof(SRAM_data_t))
+void __create_thread(int8_t priority, void *data_org, void *data_temp, uint16_t size);
 
-#define __THREAD_DUMMY(priority, idx)  \
-        __create_thread(priority, (void *)&__persistent_vars[0], (void *)&__persistent_vars[1], sizeof(SRAM_data_t));  \
-        memset((void *)&__persistent_vars[idx], 0, sizeof(SRAM_data_t));
+/**
+ * User APIs
+ */
+/** `protectedStartOffset` and `protectedSize` are both in bytes*/
+#define __THREAD(priority, protectedStartOffset, protectedSize) \
+        __create_thread((int8_t)priority, (void *)&__persistent_vars[0], (void *)&__persistent_vars[1], (sizeof(SRAM_data_t)-(int16_t)protectedSize));  \
+        __elk_plus_init_mem(priority, (uint16_t)&__persistent_vars+(int16_t)protectedStartOffset, (int16_t)protectedSize);                                        \
+        memset((void *)&__persistent_vars[1], 0, sizeof(SRAM_data_t));                                                                                  \
+        memset((void *)&__persistent_vars[0], 0, sizeof(SRAM_data_t))
 
-/** Declare protected memory region. */
-
-
-
-
+#define __THREAD_DUMMY(priority, protectedStartOffset, protectedSize, idx) \
+        __create_thread((int8_t)priority, (void *)&__persistent_vars[0], (void *)&__persistent_vars[1], (sizeof(SRAM_data_t)-(int16_t)protectedSize));  \
+        __elk_plus_init_mem(priority, (uint16_t)&__persistent_vars+(int16_t)protectedStartOffset, (int16_t)protectedSize);                                        \
+        memset((void *)&__persistent_vars[idx], 0, sizeof(SRAM_data_t))

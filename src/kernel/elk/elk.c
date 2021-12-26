@@ -18,7 +18,7 @@ __elk uint16_t  elkTotalCksum;
 __nv uint8_t    elkCurTaskID = 0;                      //this in elk
 __nv buffer_idx_t elkBufIdx;                        //this to nv
 __nv int crcSeed = 0xBEEF;
-__nv thread_t _threads[MAX_THREAD_NUM];
+
 uint16_t nvCksumTab[MAX_CKSUM_TAB_NUM];     //todo:
 __sv uint16_t svVrfiedBp = 0;                       //verified bitmap
 __sv uint8_t  svIntervalNum = 0;                    //temp valid interval number
@@ -554,13 +554,15 @@ void __elk_mark(uint8_t priority, uint8_t taskID) {
  * 3. calculate the whole cksum;
  */
 void __elk_first_cksum(){
-    uint8_t workingBufIdx = elkBufIdx._idx;
-    elkNodeBitmaps[workingBufIdx] = 1;                      //use node 0 in elkListNodes[]
+    int8_t workingBufIdx = elkBufIdx._idx;
+    elkNodeBitmaps[workingBufIdx] = 1;                          //use node 0 in elkListNodes[]
     _elk_listFirstAdd(&elkDualList[workingBufIdx], 0);
-    elkListNodes[0].intvlStart = 0;                         //in byte
-    elkListNodes[0].intvlEnd = _threads[0].buffer.size-1;   //in byte
-    elkListNodes[0].paddingNum = 0;
-    elkListNodes[0].subCksum = __elk_crc(elkListNodes[0].intvlStart, elkListNodes[0].intvlEnd, workingBufIdx, elkListNodes[0].paddingNum);
+    elkListNodes[0].intvlStart  = 0;                            //in byte
+    elkListNodes[0].intvlEnd    = _threads[0].buffer.size-1;    //in byte
+    elkListNodes[0].paddingNum  = 0;
+    elkListNodes[0].subCksum    = __elk_crc(elkListNodes[0].intvlStart, elkListNodes[0].intvlEnd, workingBufIdx, elkListNodes[0].paddingNum);
+
+    __elk_plus_first_cksum(0, workingBufIdx);
     svVrfiedBp = 1;
 }
 
@@ -577,6 +579,9 @@ void __elk_checksum(uint8_t priority, uint8_t taskID) {
     if(tempCkSet.end_used_offset){
         __elk_normal_cksum(tempCkSet.start_used_offset, tempCkSet.end_used_offset);
     }
+
+    int8_t workingBufIdx = elkBufIdx._idx;
+    __elk_plus_cksum(0, workingBufIdx);
 }
 
 /* -----------------
@@ -628,43 +633,7 @@ void __elk_backup(uint8_t priority, uint8_t taskID) {
     __dma_word_copy((unsigned int)&elkDualList[elkBufIdx.idx],    \
                     (unsigned int)&elkDualList[elkBufIdx._idx],   \
                     (unsigned short)nvListSize>>1);
-/*
-    if(elkBufIdx.idx){
-        elkDualList[elkBufIdx._idx].stElkList = elkDualList[elkBufIdx._idx].stElkList - nvListSize;
-    }else{
-        elkDualList[elkBufIdx._idx].stElkList = elkDualList[elkBufIdx._idx].stElkList + nvListSize;
-    }*/
-/*
-    uint8_t tempI = 0;
-    uint8_t tempCntr = 0;
-    uint16_t tempN = elkNodeBitmaps[elkBufIdx.idx];
-    for(tempCntr=0; tempN; ++tempCntr){ //find out the number of nodes.
-        tempN &= (tempN-1);
-    }
-    if(elkBufIdx.idx){//-||: backup is buf[1]
-        elkDualList[elkBufIdx._idx].prev = (dlist_t *)((uint32_t)elkDualList[elkBufIdx._idx].prev - nvListSize);
-        elkDualList[elkBufIdx._idx].next = (dlist_t *)((uint32_t)elkDualList[elkBufIdx._idx].next - nvListSize);
-        while(tempCntr){
-            if(GET_BIT(elkNodeBitmaps[elkBufIdx.idx],tempI)){
-                tempCntr--;
-                elkDualList[elkBufIdx._idx].stElkList[tempI].prev = (dlist_t *)((uint32_t)elkDualList[elkBufIdx._idx].stElkList[tempI].prev - nvListSize);
-                elkDualList[elkBufIdx._idx].stElkList[tempI].next = (dlist_t *)((uint32_t)elkDualList[elkBufIdx._idx].stElkList[tempI].next - nvListSize);
-            }
-            tempI++;
-        }
-    }else{
-        elkDualList[elkBufIdx._idx].prev = (dlist_t *)((uint32_t)elkDualList[elkBufIdx._idx].prev + nvListSize);
-        elkDualList[elkBufIdx._idx].next = (dlist_t *)((uint32_t)elkDualList[elkBufIdx._idx].next + nvListSize);
-        while(tempCntr){
-            if(GET_BIT(elkNodeBitmaps[elkBufIdx.idx],tempI)){
-                tempCntr--;
-                elkDualList[elkBufIdx._idx].stElkList[tempI].prev = (dlist_t *)((uint32_t)elkDualList[elkBufIdx._idx].stElkList[tempI].prev + nvListSize);
-                elkDualList[elkBufIdx._idx].stElkList[tempI].next = (dlist_t *)((uint32_t)elkDualList[elkBufIdx._idx].stElkList[tempI].next + nvListSize);
-            }
-            tempI++;
-        }
-    }
-*/
+
     //List nodeBp.  backup-->working
     elkNodeBitmaps[elkBufIdx._idx] = elkNodeBitmaps[elkBufIdx.idx];
 }

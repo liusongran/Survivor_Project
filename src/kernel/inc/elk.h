@@ -50,7 +50,8 @@ void __total_cksum_nv();
  * ELK_PLUS API
  */
 
-void __elk_plus_init_access();
-void __elk_plus_init_mem(uint16_t wholeStartAddr, uint16_t wholeSize);
+void __elk_plus_init_access(int8_t priority);
+void __elk_plus_init_mem(int8_t priority, int16_t wholeStartAddr, int16_t wholeSize);
 bool __elk_plus_verify(uint16_t idxI, uint16_t idxJ);
-void __elk_plus_cksum();
+void __elk_plus_first_cksum(int8_t priority, int8_t bufferIdx);
+void __elk_plus_cksum(int8_t priority, int8_t bufferIdx);
