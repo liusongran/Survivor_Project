@@ -7,8 +7,8 @@
 /* -----------------
  * METHOD SELECTION:
  */
-#define ELK                 1
-#define ELK_PLUS            (1-ELK)
+//#define ELK
+
 
 /* -----------------------
  * APP SELECTION FOR USER:

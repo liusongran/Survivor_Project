@@ -666,6 +666,7 @@ void __scheduler_run(){
 PRB_START_P(verify)
             tempResult = __elk_verify(0,elkCurTaskID);      //NOTE: Step1
 PRB_END_P(verify)
+            printk("%lu.\r\n",delta);
             if(tempResult==VERIFY_FAILED){
                 nvInited = 0;
                 break;

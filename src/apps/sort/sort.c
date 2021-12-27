@@ -1,6 +1,7 @@
 #include <task.h>
 #include <apps.h>
 #include "./sort.h"
+#include "profile.h"
 
 /*
  * 1. TASK declaration
@@ -14,10 +15,10 @@ TASK(task_finish);              //-(3)
  * 2. Shared variable declaration (206 bytes)
  */
 __shared(
-uint16_t array[LENGTH];         //-[1]:200
 uint16_t outer_idx;             //-[2]:2
 uint16_t inner_idx;             //-[3]:2
 uint16_t iteration;             //-[4]:2
+uint16_t array[LENGTH];         //-[1]:200
 )
 
 uint16_t in_i, in_j, arr_i, arr_j;
@@ -54,12 +55,16 @@ TASK(task_init){                //-(1), R[4] || W[1,2,3,4]. NOTE: size-[0,205]
 TASK(task_inner_loop){          //-(2), R[1-P,2,3] || W[1-P,3]. NOTE: size-[0,203]
     uint16_t i, j, x_i, x_j, temp;
     uint16_t x_k;
+    uint16_t tempItr = 0;
 
-    for(x_k=0; x_k<250; x_k++){
+    for(x_k=0; x_k<1000; x_k++){
         i = __GET(outer_idx);
         j = __GET(inner_idx);
 
-        __elk_plus_verify(i,j);
+        __elk_plus_verify((i<<1),(j<<1));
+        tempItr ++;
+        //printk("i:%d, j:%d\r\n", i, j);
+
 
         x_i = __GET(array[i]);
         x_j = __GET(array[j]);
@@ -76,15 +81,17 @@ TASK(task_inner_loop){          //-(2), R[1-P,2,3] || W[1-P,3]. NOTE: size-[0,20
             ++__SET(outer_idx);
             __SET(inner_idx) = __GET(outer_idx) + 1;
             if (__GET(outer_idx) >= LENGTH - 1){
+                printk("tempItr:%d\r\n", tempItr);
                 NEXT(3);
             }
         }
     }
+    printk("tempItr:%d\r\n", tempItr);
     NEXT(2);
 }
 
 TASK(task_finish){              //-(3)
-    if(__GET(iteration)>400){
+    if(__GET(iteration)>3){
         NEXT(0);
     }else{
         NEXT(1);
@@ -98,14 +105,13 @@ extern buffer_idx_t elkBufIdx;
  */
 void _benchmark_sort_init(){
     if(!nvInited){
-        __THREAD(0, 15, 190);
+        __THREAD(0, 6, 1000);
 
-        TASK_INIT(0, task_setup, 0, 3);
-        TASK_INIT(0, task_init,         0,      155);   //0 - [0,205]
-        TASK_INIT(0, task_inner_loop,   0,      153);   //1 - [0,203]
-        //TASK_INIT(0, task_outer_loop,   300,    303);   //2 - [200,203]
-        TASK_INIT(0, task_finish,       0,      3);     //3 - [0,0]
+        TASK_INIT(0, task_setup,        0,      5);
+        TASK_INIT(0, task_init,         0,      5);   //0 - [0,205]
+        TASK_INIT(0, task_inner_loop,   0,      5);   //1 - [0,203]
+        TASK_INIT(0, task_finish,       0,      5);     //3 - [0,0]
     }else{
-        __THREAD_DUMMY(0, 15, 190, elkBufIdx._idx);
+        __THREAD_DUMMY(0, 6, 200, elkBufIdx._idx);
     }
 }

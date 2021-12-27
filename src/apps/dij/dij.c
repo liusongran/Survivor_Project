@@ -86,6 +86,7 @@ TASK(task_init_list){//---1, NOTE: R(5) || W(5,7)
         __SET(nearest_node.node) = __GET(queue[i].node);
         __SET(nearest_node.dist) = __GET(queue[i].dist);
         __SET(nearest_node.prev) = __GET(queue[i].prev);
+        __elk_plus_verify((i<<1),0);
         i++;
         if (i < Q_SIZE) {
             __SET(deq_idx) = i;
@@ -112,6 +113,7 @@ TASK(task_init_list){//---1, NOTE: R(5) || W(5,7)
                     __SET(queue[j].node) = i;
                     __SET(queue[j].dist) = nearest_dist + cost;
                     __SET(queue[j].prev) = node;
+                    __elk_plus_verify((j<<1),0);
                     j++;
                     if (j < Q_SIZE) {
                         __SET(enq_idx) = j;
@@ -144,7 +146,7 @@ extern uint16_t nvInited;
 extern buffer_idx_t elkBufIdx;
 void _benchmark_dijkstra_init(){
     if(!nvInited){
-        __THREAD(0);
+        __THREAD(0, );
 
         TASK_INIT(0, task_init,                   0,    11);       //0
         TASK_INIT(0, task_init_list,              0,    413); //1

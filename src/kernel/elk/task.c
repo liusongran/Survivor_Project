@@ -6,7 +6,7 @@ __nv thread_t _threads[MAX_THREAD_NUM];
  * Assigns a slot to a thread. Should be called ONLY at the first system boot.
  * @para.   size: in byte
  */
-void __create_thread(int8_t priority, void *data_org, void *data_temp, uint16_t size){
+void __create_thread(uint8_t priority, void *data_org, void *data_temp, uint16_t size){
     _threads[priority].priority                 = priority;
     _threads[priority].buffer.buf[0]            = data_org;         // working buffer
     _threads[priority].buffer.buf[1]            = data_temp;        // backup buffer

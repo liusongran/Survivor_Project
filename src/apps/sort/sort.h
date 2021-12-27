@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <apps.h>
 
-#define LENGTH 75
+#define LENGTH 500
 
 /**--------------
  * AB time cost:

@@ -50,6 +50,9 @@ typedef struct {
     mem_region_t wholeMem[APP_REGION_NUM];
 }whole_mem_t;
 
+/** The task definition (single C function). */
+typedef uint8_t (*taskfun_t) (void *);
+
 /** The main task structure for each Task. */
 typedef struct {
     void *fun_entry;
@@ -59,15 +62,14 @@ typedef struct {
 
 /** the main thread structure that holds all necessary info. */
 typedef struct {
-    int8_t priority;                           //thread priority (unique)
+    uint8_t priority;                           //thread priority (unique)
     uint8_t idx_of_first_empty_task;
     task_t task_array[MAX_TASK_NUM];
     buffer_t buffer;                            //holds task shared persistent variables
     whole_mem_t protected_mem;
 }thread_t;
 
-/** The task definition (single C function). */
-typedef uint8_t (*taskfun_t) (buffer_t *);
+
 
 /** Declared variables */
 extern thread_t _threads[MAX_THREAD_NUM];
@@ -97,19 +99,19 @@ void __init_task(uint8_t priority, void *task_entry, uint16_t start_used_offset,
 #define NEXT(id)  return (uint16_t)id
 
 /** Create a thread. */
-void __create_thread(int8_t priority, void *data_org, void *data_temp, uint16_t size);
+void __create_thread(uint8_t priority, void *data_org, void *data_temp, uint16_t size);
 
 /**
  * User APIs
  */
 /** `protectedStartOffset` and `protectedSize` are both in bytes*/
 #define __THREAD(priority, protectedStartOffset, protectedSize) \
-        __create_thread((int8_t)priority, (void *)&__persistent_vars[0], (void *)&__persistent_vars[1], (sizeof(SRAM_data_t)-(int16_t)protectedSize));  \
-        __elk_plus_init_mem(priority, (uint16_t)&__persistent_vars+(int16_t)protectedStartOffset, (int16_t)protectedSize);                                        \
-        memset((void *)&__persistent_vars[1], 0, sizeof(SRAM_data_t));                                                                                  \
+        __create_thread((uint8_t)priority, (void *)&__persistent_vars[0], (void *)&__persistent_vars[1], (sizeof(SRAM_data_t)*2-(uint16_t)protectedSize));  \
+        __elk_plus_init_mem((uint8_t)priority, (uint16_t)protectedStartOffset, (uint16_t)protectedSize);                                                    \
+        memset((void *)&__persistent_vars[1], 0, sizeof(SRAM_data_t));                                                                                      \
         memset((void *)&__persistent_vars[0], 0, sizeof(SRAM_data_t))
 
-#define __THREAD_DUMMY(priority, protectedStartOffset, protectedSize, idx) \
-        __create_thread((int8_t)priority, (void *)&__persistent_vars[0], (void *)&__persistent_vars[1], (sizeof(SRAM_data_t)-(int16_t)protectedSize));  \
-        __elk_plus_init_mem(priority, (uint16_t)&__persistent_vars+(int16_t)protectedStartOffset, (int16_t)protectedSize);                                        \
+#define __THREAD_DUMMY(priority, protectedStartOffset, protectedSize, idx)                                                                                  \
+        __create_thread((uint8_t)priority, (void *)&__persistent_vars[0], (void *)&__persistent_vars[1], (sizeof(SRAM_data_t)*2-(uint16_t)protectedSize));  \
+        __elk_plus_init_mem((uint8_t)priority, (uint16_t)protectedStartOffset, (uint16_t)protectedSize);                                                    \
         memset((void *)&__persistent_vars[idx], 0, sizeof(SRAM_data_t))
