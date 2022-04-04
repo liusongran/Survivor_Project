@@ -176,23 +176,8 @@ SECTIONS
 
 #ifndef __LARGE_DATA_MODEL__
     .const            : {} > FRAM           /* Constant data                     */
-    .nv_vars          : {} > FRAM
-    .elk_vars         : {} > FRAM
-    .elk_cst_vars     : {} > FRAM
-    .elk_glbal_vars   : {} > FRAM
-    .elk_sub_cksum    : {} > FRAM
-    .sv_vars		  : {} > FRAM
-    .elk_du_vars	  : {} > FRAM
-
 #else
     .const            : {} >> FRAM | FRAM2  /* Constant data                     */
-   	.nv_vars          : {} > FRAM
-    .elk_vars         : {} > FRAM
-    .elk_cst_vars     : {} > FRAM
-    .elk_glbal_vars   : {} > FRAM
-    .elk_sub_cksum    : {} > FRAM
-  	.sv_vars		  : {} > FRAM
-    .elk_du_vars	  : {} > FRAM
 #endif
 
 #ifndef __LARGE_CODE_MODEL__
@@ -224,6 +209,10 @@ SECTIONS
     .data       : {} > RAM                  /* Global & static vars              */
     .TI.noinit  : {} > RAM                  /* For #pragma noinit                */
     .stack      : {} > RAM (HIGH)           /* Software system stack             */
+
+    .nv_vars    : {} > FRAM
+    .sv_vars    : {} > RAM
+    .elk_vars   : {} > RAM
 
     .tinyram    : {} > TINYRAM              /* Tiny RAM                          */
 

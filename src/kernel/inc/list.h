@@ -1,52 +1,48 @@
+#ifndef LIST_H_
+#define LIST_H_
 #include <stdint.h>
 //#define CRC32                   //use this as default. comment it to use CRC16.
 
 #define MAX_SUB_CKSUM_NUM   4
 #define MAX_CKSUM_TAB_NUM   128
 
-typedef struct {
+typedef struct{
     uint16_t    intvlStart;
     uint16_t    intvlEnd;
     uint16_t    subCksum;
-    uint16_t    paddingNum;     //number of padding-zeros to end
 }list_node_t;
 
+/** Double Linked List */
 typedef struct dblist_t{
-    //struct dblist_t *prev;
-    uint16_t prevNode;
-    //struct dblist_t *next;
-    uint16_t nextNode;
-    //uint16_t nodeIdx;
+    uint16_t    prevNode;           // index of `stElkList[MAX_SUB_CKSUM_NUM]`
+    uint16_t    nextNode;           // index of `stElkList[MAX_SUB_CKSUM_NUM]`
 }dlist_t;
 
-typedef struct {
-    //dlist_t *prev;
-    uint16_t prevNode;
-    //dlist_t *next;
-    uint16_t nextNode;
-    dlist_t stElkList[MAX_SUB_CKSUM_NUM];
+/** ELK_struc: 
+ *  - List to record interval distribution, also act as header of list `stElkList[MAX_SUB_CKSUM_NUM]` 
+ */
+typedef struct{
+    uint16_t    usedNodeNum;        // number of valid node in list `stElkList[MAX_SUB_CKSUM_NUM]`
+    uint16_t    nextNode;           // point to the first valid node in list `stElkList[MAX_SUB_CKSUM_NUM]`
+    dlist_t     stElkList[MAX_SUB_CKSUM_NUM];
 }elk_list_t;
 
+/** ELK_lib_fun:
+ *  - Init. `elk_list`
+ */
 inline void _elk_listInit(elk_list_t *list){
-    //list->next = (dlist_t*)list;
-    list->prevNode = 99;
-    //list->prev = (dlist_t*)list;
+    list->usedNodeNum = 0;
     list->nextNode = 99;
-    /*
-    uint8_t tempItr;
-    for (tempItr = 0; tempItr < MAX_SUB_CKSUM_NUM; tempItr++){
-        list->stElkList[tempItr].nodeIdx = tempItr;
-    }*/
 }
 
+/** ELK_lib_fun:
+ *  - Add first node into `elk_list` and `stElkList[MAX_SUB_CKSUM_NUM]`
+ */
 inline void _elk_listFirstAdd(elk_list_t *list, uint16_t nodeIdx){
-    //nextNode->prev = (dlist_t*)list;
-    //nextNode->next = (dlist_t*)list;
     list->stElkList[nodeIdx].nextNode = 99;
     list->stElkList[nodeIdx].prevNode = 99;
-    
-    //list->next = nextNode;
-    //list->prev = nextNode;
+
+    list->usedNodeNum = 1;
     list->nextNode = nodeIdx;
-    list->prevNode = nodeIdx;
 }
+#endif

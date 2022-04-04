@@ -1,99 +1,80 @@
 #include "main.h"
+#include "mcu.h"
+#include "elk_api.h"
 #include "apps.h"
-#include "elk.h"
-#include "simulation.h"
-#include "profile.h"
 
-
-
-extern uint8_t svIntervalNum;
-extern uint16_t svVrfiedBp;
-extern uint16_t svMarkedBp;
-extern uint8_t elkCurTaskID;
-extern uint8_t testFlg;
-__nv uint16_t _chg_num=0;
-
-extern uint16_t roundNum;
-
-extern int32_t checkPeriod;
-extern uint8_t fail_flag;
-extern uint32_t nvFailedNum;
-
-
-
-static void __chg_bgt_get(){
-    _chg_curBgt = SIMU_ON_PERIOD;
+/* 
+ * ---------------
+ * Energy charger.
+ * ---------------
+ */
+extern int64_t _chg_curBgt;
+extern uint16_t _chg_num;
+static void __chg_bgt_get_elk(){
+    _chg_curBgt = ON_PERIOD;
     _chg_num++;
-#ifdef TOTALRECALL
+}
+extern int32_t checkPeriod;
+extern uint32_t nvFailedNum;
+extern uint16_t roundNum;
+static void __chg_bgt_get_total(){
+    _chg_curBgt = ON_PERIOD;
+    while(_chg_num>FAIL_NUM){
+        //printk("--||Total APP num:%d.\r\n",roundNum);
+        //printk("--||Failed APP num:%lu.\r\n",nvFailedNum);
+        while(1);
+    }
+    _chg_num++;
     checkPeriod = CKSUM_FRQ;
-#endif
 }
 
+/* 
+ * --------------
+ * Entry of Main.
+ * --------------
+ */
+extern uint8_t svIntervalNum;   //??
+extern uint16_t nvInited;
+extern uint8_t testFlg;
 extern uint64_t taskSum;
 extern uint16_t nvTaskNum;
-
-int main(void){
+extern uint8_t elkCurTaskID;
+extern uint16_t svVrfiedBp; extern uint16_t svMarkedBp;
+extern uint32_t delta;      extern uint64_t total;
+extern uint16_t initStart;  extern uint16_t initEnd;    extern uint64_t initSum;
+extern uint16_t backupStart;extern uint16_t backupEnd;  extern uint64_t backupSum;
+int main(void)
+{
     __mcu_init();
-    __gpio_init();
-    __uart_init();
+    UART_initGPIO();
+    UART_init();
     __timerA_init();
-
     while(1){
-        __chg_bgt_get();
-
+        __chg_bgt_get_elk();
         if(nvInited){
-#ifdef TOTALRECALL
-            delta = 0;
-if(_chg_curBgt<delta){
-    total += _chg_curBgt;
-    _chg_curBgt = 0;
-}else{
-    total += delta;
-    _chg_curBgt -= delta;
-    checkPeriod -= delta;
-}
-            if(fail_flag){
-                nvFailedNum++;
-                fail_flag = 0;
-                nvInited=0;
-                testFlg=0;
-            }
-#endif
-
-#ifdef ELK
 PRB_START(init)
             if(VERIFY_PASS==__elk_check_nv()){
-                elkCurMode = 0;
+PRB_END(init)
                 svIntervalNum = 0;
                 svVrfiedBp = 0;
                 svMarkedBp = 0;
-                __elk_backup(0, elkCurTaskID);
+PRB_START(backup)
+                __elk_backup(elkCurTaskID);
+PRB_START(backup)
             }else{
                 nvInited=0;
                 testFlg=0;
             }
-PRB_END(init)
-#endif
         }
-
         while(1){
             if(_chg_curBgt<=0){
                 break;
             }
-
-#ifdef ELK
-            if(!nvInited&&!testFlg){
+            if((!nvInited) && (!testFlg)){ //-not first boot AND finish one round, only used in profile
                 __elk_init();
-                ENTER_CRITICAL
             }
-#endif
-            if(!nvInited||testFlg){
+            if((!nvInited) || (testFlg)){
                 testFlg = 0;
-#ifdef TOTALRECALL
-                elkCurTaskID = 0;
-                taskSum = 0;
-                nvTaskNum = 0;
-#endif
 #ifdef SRT
                 _benchmark_sort_init();
 #endif
@@ -125,8 +106,7 @@ PRB_END(init)
                 _benchmark_adpcm_init();
 #endif
             }
-
-            __scheduler_run();          //kick-off run-time system.
+            __scheduler_run();  //kick-off run-time system.
         }
     }
     printk("[ERROR] Should not reach here!\r\n");

@@ -1,11 +1,17 @@
+#ifndef MAIN_H_
+#define MAIN_H_
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+
 #include <msp430.h>
+
 #include <driverlib.h>
+#include <HAL_UART.h>
 
 static void __cs_init(){
     CS_setDCOFreq(CS_DCORSEL_1, CS_DCOFSEL_4);      //Set DCO frequency to 16MHz
+
     /**
      * Configure one FRAM waitstate as required by the device datasheet for MCLK
      * operation beyond 8MHz _before_ configuring the clock system.
@@ -16,7 +22,6 @@ static void __cs_init(){
     CS_initClockSignal(CS_SMCLK,CS_DCOCLK_SELECT,CS_CLOCK_DIVIDER_1);
     CS_initClockSignal(CS_ACLK,CS_LFXTCLK_SELECT,CS_CLOCK_DIVIDER_1);
 }
-
 void __timerA_init(){
     Timer_A_initContinuousModeParam initContParam = {0};
     initContParam.clockSource = TIMER_A_CLOCKSOURCE_SMCLK;
@@ -38,3 +43,4 @@ void __mcu_init(){
 
     __cs_init();                    //Clock system
 }
+#endif

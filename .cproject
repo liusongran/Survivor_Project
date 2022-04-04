@@ -99,7 +99,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/apps/rsa|src/apps/fft|src/apps/dij|src/apps/cuckoo|src/apps/crc|src/apps/cem|src/apps/bc|src/apps/ar|src/apps/adpcm" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/apps/rsa|src/apps/fft|src/apps/cuckoo|src/apps/crc|src/apps/cem|src/apps/bc|src/apps/ar|src/apps/adpcm" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
