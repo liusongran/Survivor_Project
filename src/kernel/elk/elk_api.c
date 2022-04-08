@@ -92,6 +92,12 @@ void __elk_first_cksum()
     elkListNodes[0].subCksum    = _elk_crc(elkListNodes[0].intvlStart, elkListNodes[0].intvlEnd, workingBufIdx);
 
     svVrfiedBp = 0x0001;                                        // update the verified bitmap
+#if (DEBUG_INTV_NUM == 1)
+    printk("--cksum|Used node:%d.\r\n", elkDualList[workingBufIdx].usedNodeNum);
+    printk("--cksum|Bitmap[0]:%d.\r\n", elkNodeBitmaps[0]);
+    printk("--cksum|Bitmap[1]:%d.\r\n", elkNodeBitmaps[1]);
+    printk("--cksum|Bitmap[2]:%d.\r\n", elkNodeBitmaps[2]);
+#endif
 }
 
 /* -----------------
@@ -141,6 +147,15 @@ void __elk_backup(uint8_t taskID)
 
     //List nodeBp.  backup-->working
     elkNodeBitmaps[elkBufIdx._idx] = elkNodeBitmaps[elkBufIdx.idx];
+#if (DEBUG_BACKUP==1)
+    printk("+++++++++++++++++++++++++++++\r\n");
+    printk("--backup|log.\r\n");
+    printk("--backup|elkDualList[0].usedNodeNum:%d.\r\n",elkDualList[0].usedNodeNum);
+    printk("--backup|elkDualList[1].usedNodeNum:%d.\r\n",elkDualList[1].usedNodeNum);
+    printk("--backup|Bitmap[0]:%d.\r\n", elkNodeBitmaps[0]);
+    printk("--backup|Bitmap[1]:%d.\r\n", elkNodeBitmaps[1]);
+    printk("--backup|Bitmap[2]:%d.\r\n", elkNodeBitmaps[2]);
+#endif
 }
 
 /* ------------------
@@ -161,21 +176,17 @@ void __elk_backup(uint8_t taskID)
 cksum_temp_t __elk_update_nv() 
 {
     uint8_t tempI = 0;
-    uint8_t tempCntr = 0;
-    uint8_t workingBufIdx = elkBufIdx._idx;                 //has change to working buffer
-    uint16_t tempN = elkNodeBitmaps[workingBufIdx];
+    uint8_t workingBufIdx = elkBufIdx._idx;                 //always working on working buffer
+    uint8_t tempCntr = elkDualList[workingBufIdx].usedNodeNum;//get current used node number
+
     cksum_temp_t tempCksum;
     tempCksum.svCksumTemp = 0;
-
-    for(tempCntr=0; tempN; ++tempCntr){                     //Find out the number of new nodes.
-        tempN &= (tempN-1);
-    }
 
     //HWREG16(CRC_BASE + OFS_CRCINIRES) = crcSeed;          //FIXME:!!!
     while(tempCntr){                                        //Compute total-cksum using sub-cksums.
         if(GET_BIT(elkNodeBitmaps[workingBufIdx],tempI)){
             tempCntr--;
-            tempCksum.svCksumTemp ^= elkListNodes[tempI].subCksum;
+            //tempCksum.svCksumTemp ^= elkListNodes[tempI].subCksum;
             HWREG16(CRC_BASE + OFS_CRCDI) = elkListNodes[tempI].intvlStart;
             HWREG16(CRC_BASE + OFS_CRCDI) = elkListNodes[tempI].intvlEnd;
             HWREG16(CRC_BASE + OFS_CRCDI) = elkListNodes[tempI].subCksum;
@@ -203,12 +214,14 @@ uint16_t __elk_check_nv()
     uint8_t backupBufIdx = elkBufIdx.idx;
 
     uint16_t tempCksum;
-
+    /*
     uint8_t tempCntr = 0;
     volatile uint16_t tempN = elkNodeBitmaps[backupBufIdx];
     for(tempCntr=0; tempN; ++tempCntr){ //find out the number of new nodes.
         tempN &= (tempN-1);
-    }
+    }*/
+
+    uint8_t tempCntr = elkDualList[backupBufIdx].usedNodeNum;
 
     tempCksum = 0;
     while(tempCntr){

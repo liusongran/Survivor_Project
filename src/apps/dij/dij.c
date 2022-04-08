@@ -38,7 +38,7 @@ __shared(
     uint16_t node_idx;              //-[4]:2
     uint16_t src_node;              //-[5]:2
     queue_t nearest_node;           //-[6]:6
-    node_t node_list[N_NODES];      //-[7]:100  , 100
+    node_t node_list[N_NODES];      //-[7]:100  , 100 100
 )
 
 /**
@@ -146,11 +146,11 @@ void _benchmark_dijkstra_init(){
     if(!nvInited){
         __THREAD(0);
 
-        TASK_INIT(0, task_init,                   0,    11);       //0
-        TASK_INIT(0, task_init_list,              0,    500); //1
+        TASK_INIT(0, task_init,                   0,    413);       //0
+        TASK_INIT(0, task_init_list,              200,    399); //1
         //TASK_INIT(0, task_select_nearest_node,    0,    713); //2
         //TASK_INIT(0, task_find_shorter_path,      0,    99);    //3
-        TASK_INIT(0, task_done,                   0,    0);  //4
+        TASK_INIT(0, task_done,                   100,    413);  //4
     }else{
         __THREAD_DUMMY(0, elkBufIdx._idx);
     }

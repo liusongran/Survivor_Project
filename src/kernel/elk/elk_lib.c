@@ -172,12 +172,14 @@ void _elk_dlist_replace_mtom(   uint8_t startIdx,       \
     //NOTE:-1
     uint8_t  tempI = startIdx; 
     uint16_t tempN = 0;         //node-idx which will be removed
+    uint8_t  tempRemv = 1;
     while(1){
         SET_BIT(tempN,tempI);
         if(tempI==endIdx){
             break;
         }else{
             tempI = elkDualList[bufIdx].stElkList[tempI].nextNode;
+            tempRemv++;
         }
     }
     //NOTE:-2
@@ -190,7 +192,8 @@ void _elk_dlist_replace_mtom(   uint8_t startIdx,       \
         tempM &= (tempM-1);
     }
     //NOTE:-4
-    elkDualList[bufIdx].usedNodeNum += (tempCntr-1);
+    elkDualList[bufIdx].usedNodeNum += (tempCntr-tempRemv);
+
     //NOTE:-5
     tempI = 0;
     uint16_t tempPrevNodeIdx = elkDualList[bufIdx].stElkList[startIdx].prevNode;
@@ -409,4 +412,12 @@ void _elk_normal_cksum( uint16_t tgtIntvlStart, \
             _elk_dlist_replace_1tom(svIdxIntvlStart, elkNodeBitmaps[2], workingBufIdx);
         }
     }
+    //DEBUG:
+#if (DEBUG_INTV_NUM == 1)
+    printk("---------------------------------------\r\n");
+    printk("--cksum|Used node:%d.\r\n", elkDualList[workingBufIdx].usedNodeNum);
+    printk("--cksum|Bitmap[0]:%d.\r\n", elkNodeBitmaps[0]);
+    printk("--cksum|Bitmap[1]:%d.\r\n", elkNodeBitmaps[1]);
+    printk("--cksum|Bitmap[2]:%d.\r\n", elkNodeBitmaps[2]);
+#endif
 }

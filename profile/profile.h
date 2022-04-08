@@ -32,15 +32,20 @@
 
 
 
-
+/**
+ * TRACE INFO MACROS
+ */
 #define TRACE_TASK              1
 #define TRACE_CRC_TIME          0
 #define TRACE_CRC_SIZE          0
 
 #define PROFILE_RET             1       //profile all results
 
-
-
+/**
+ * DEBUG PROGRAM MACROS
+ */
+#define DEBUG_INTV_NUM          0       //cksum
+#define DEBUG_BACKUP            0       //backup
 
 #ifdef TRACE
 #define ITER        3
