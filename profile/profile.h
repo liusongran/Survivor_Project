@@ -46,6 +46,10 @@
  */
 #define DEBUG_INTV_NUM          0       //cksum
 #define DEBUG_BACKUP            0       //backup
+#define DEBUG_VERIFY            0
+#define DEBUG_TASK              0
+#define DEBUG_CKSUM             0
+#define DEBUG_COMMIT            0
 
 #ifdef TRACE
 #define ITER        3

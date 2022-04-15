@@ -1,24 +1,7 @@
 #include "elk_api.h"
 #include "elk_lib.h"
 
-/* ---------------
- * [__elk_verify]: ELK_API_fun
- * LOG: Always verify content in backup buffer.
- * 1. find sub-interval index of target sub-interval
- * 2. verify each sub-interval
- * 3. update verified-flag
- * 4. return results
- * @para.:
- *      - taskID
- * @used global vars:
- *      - `_threads`
- *      - `elkBufIdx`
- *      - `svVrfiedBp`
- *      - `elkListNodes`
- *      - `elkDualList`
- *      - `svIdxIntvlStart`
- *      - `svIdxIntvlEnd`
- */
+
 uint8_t __elk_verify(uint8_t taskID)
 {
     uint8_t i = 0;
@@ -38,10 +21,20 @@ uint8_t __elk_verify(uint8_t taskID)
         tempNextNodeIdx = elkDualList[backupBufIdx].stElkList[tempNextNodeIdx].nextNode;
         //TODO: print debug info here to show `tempNextNodeIdx`
     }
-
     uint8_t tempResult = 0;
     uint16_t tempCksum = 0;
-    uint8_t tempNodeIdx = svIdxIntvlStart;
+    uint8_t tempNodeIdx = elkDualList[backupBufIdx].nextNode;
+#if (DEBUG_VERIFY==1)
+    printf("|!!!1.|verify|bacupBufIdx:%d.\r\n", backupBufIdx);
+    printf("|!!!1.|verify|taskID:%d, workingusedNode:%d.\r\n", taskID, elkDualList[elkBufIdx._idx].usedNodeNum);
+    printf("|!!!1.|verify|taskID:%d, backupusedNode:%d.\r\n", taskID, elkDualList[backupBufIdx].usedNodeNum);
+    for(i=0; i<elkDualList[backupBufIdx].usedNodeNum; i++){
+        printf("|!!!1.|verify|nodeIdx:%u, intvS:%u, intvE:%u.\r\n", tempNodeIdx, elkListNodes[tempNodeIdx].intvlStart, elkListNodes[tempNodeIdx].intvlEnd);
+        tempNodeIdx = elkDualList[backupBufIdx].stElkList[tempNodeIdx].nextNode;
+    }
+#endif
+
+    tempNodeIdx = svIdxIntvlStart;
     for(i=0; i<elkDualList[backupBufIdx].usedNodeNum; i++){
         if(GET_BIT(svVrfiedBp,tempNodeIdx) == 0){
             tempCksum = _elk_crc(   elkListNodes[tempNodeIdx].intvlStart,   \
@@ -65,22 +58,7 @@ uint8_t __elk_verify(uint8_t taskID)
     return tempResult;
 }
 
-/* --------------------srliu:DONE!!!
- * [__elk_first_cksum]: 
- * LOG: the very first checksum of global variables as a whole to list node elkListNodes[0].
- * 1. clear nodeBitmap set;
- * 2. update nodeBitmap[working_buffer];
- * 3. calculate the whole cksum;
- * @para.:
- * 
- * @used global vars:
- *      - `_threads`
- *      - `elkNodeBitmaps`
- *      - `elkDualList`
- *      - `elkBufIdx`
- *      - `elkListNodes`
- *      - `svVrfiedBp`
- */
+
 void __elk_first_cksum()
 {
     uint8_t workingBufIdx = elkBufIdx._idx;
@@ -92,48 +70,30 @@ void __elk_first_cksum()
     elkListNodes[0].subCksum    = _elk_crc(elkListNodes[0].intvlStart, elkListNodes[0].intvlEnd, workingBufIdx);
 
     svVrfiedBp = 0x0001;                                        // update the verified bitmap
-#if (DEBUG_INTV_NUM == 1)
-    printk("--cksum|Used node:%d.\r\n", elkDualList[workingBufIdx].usedNodeNum);
-    printk("--cksum|Bitmap[0]:%d.\r\n", elkNodeBitmaps[0]);
-    printk("--cksum|Bitmap[1]:%d.\r\n", elkNodeBitmaps[1]);
-    printk("--cksum|Bitmap[2]:%d.\r\n", elkNodeBitmaps[2]);
+#if (DEBUG_CKSUM == 1)
+    printk("|+++4.|cksum|Working Used node:%d.\r\n", elkDualList[workingBufIdx].usedNodeNum);
+    printk("|+++4.|cksum|Backup Used node:%d.\r\n", elkDualList[elkBufIdx.idx].usedNodeNum);
+    printk("|+++4.|cksum|Bitmap[0]:%d.Bitmap[1]:%d.Bitmap[2]:%d.\r\n", elkNodeBitmaps[0], elkNodeBitmaps[1], elkNodeBitmaps[2]);
 #endif
 }
 
-/* -----------------
- * [__elk_checksum]:
- * LOG: update checksum.
- * 1. first boot    --> __elk_first_cksum();
- * 2. not first
- *      - clear mark
- *      - intermittent
- * @para.:
- *      - taskID
- * @used global vars:
- *      - `_threads`
- */
+
 void __elk_checksum(uint8_t taskID)
 {
     ck_set_t tempCkSet = _threads[0].task_array[taskID].ck_set;
-    _elk_normal_cksum(tempCkSet.start_used_offset, tempCkSet.end_used_offset);
+    if(tempCkSet.end_used_offset){
+        _elk_normal_cksum(tempCkSet.start_used_offset, tempCkSet.end_used_offset);
+    }
 }
 
-/* ---------------
- * [__elk_backup]: done!!
- * LOG: buffer backup, backup-buf ---> working-buf.
- * 1. global data, total or partial copy
- * 2. sub-cksum:elkDualList and bitmap
- * 3. pc-pointers
- * @para.:
- *      - taskID
- * @used global vars:
- *      - `_threads`
- *      - `nvListSize`
- *      - `elkNodeBitmaps`
- *      - `elkDualList`
- */
+
 void __elk_backup(uint8_t taskID)
 {
+#if (DEBUG_BACKUP==1)
+    printk("|+++2.|backup|elkDualList[0].usedNodeNum:%d.\r\n",elkDualList[0].usedNodeNum);
+    printk("|+++2.|backup|elkDualList[1].usedNodeNum:%d.\r\n",elkDualList[1].usedNodeNum);
+    printk("|+++2.|backup|Bitmap[0]:%d.Bitmap[1]:%d.Bitmap[2]:%d.\r\n", elkNodeBitmaps[0],elkNodeBitmaps[1],elkNodeBitmaps[2]);
+#endif
     //global data.  backup-->working
     buffer_t *buffer = &_threads[0].buffer;
     __dma_word_copy((unsigned int)buffer->buf[elkBufIdx.idx],     \
@@ -147,32 +107,9 @@ void __elk_backup(uint8_t taskID)
 
     //List nodeBp.  backup-->working
     elkNodeBitmaps[elkBufIdx._idx] = elkNodeBitmaps[elkBufIdx.idx];
-#if (DEBUG_BACKUP==1)
-    printk("+++++++++++++++++++++++++++++\r\n");
-    printk("--backup|log.\r\n");
-    printk("--backup|elkDualList[0].usedNodeNum:%d.\r\n",elkDualList[0].usedNodeNum);
-    printk("--backup|elkDualList[1].usedNodeNum:%d.\r\n",elkDualList[1].usedNodeNum);
-    printk("--backup|Bitmap[0]:%d.\r\n", elkNodeBitmaps[0]);
-    printk("--backup|Bitmap[1]:%d.\r\n", elkNodeBitmaps[1]);
-    printk("--backup|Bitmap[2]:%d.\r\n", elkNodeBitmaps[2]);
-#endif
 }
 
-/* ------------------
- * [__elk_update_nv]:
- * LOG: update total cksum to NVM.
- * 1. setup crc seed;
- * 2. cksum elklistnodes using elkNodeBitmaps[backupBufIdx]
- * 3. cksum __elk memory
- * 4. cksum elkDualList[backupBufIdx]
- * @para.:
- * 
- * @used global vars:
- *      - `elkBufIdx`
- *      - `nvListSize`
- *      - `elkNodeBitmaps`
- *      - `elkDualList`
- */
+
 cksum_temp_t __elk_update_nv() 
 {
     uint8_t tempI = 0;
@@ -202,12 +139,7 @@ cksum_temp_t __elk_update_nv()
     return tempCksum;
 }
 
-/* ------------------
- * [__elk_ckeck_nv]:
- * LOG: update total cksum to NVM.
- * 1. compute the __shared() cksum;
- * 2. combine it with all elk variables;
- */
+
 uint16_t __elk_check_nv()
 {
     uint8_t tempI = 0;
@@ -250,19 +182,7 @@ uint16_t __elk_check_nv()
     return VERIFY_PASS;
 }
 
-/* ---------------
- * [__elk_commit]: done!!
- * LOG: buffer commit, backup-buf ---> working-buf.
- * 1. swap-pointers
- * @para.:
- *      - tempTaskID
- *      - tempCksum
- * @used global vars:
- *      - `elkBufIdx`
- *      - `elkCurTaskID`
- *      - `nvTotalCksum`
- *      - `elkTotalCksum`
- */
+
 inline void __elk_commit(   uint8_t tempTaskID, 
                             cksum_temp_t tempCksum)
 {
@@ -273,10 +193,7 @@ inline void __elk_commit(   uint8_t tempTaskID,
     elkTotalCksum   = tempCksum.svCksumTemp;
 }
 
-/* -------------
- * [__elk_init]: done!!
- * LOG: ELK variables inited.
- */
+
 void __elk_init() {
     //printk("__elk_init() is called.\r\n");
     nvInited = 0;                   // To un-booted

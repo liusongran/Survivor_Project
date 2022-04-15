@@ -49,6 +49,9 @@ int main(void)
     UART_initGPIO();
     UART_init();
     __timerA_init();
+
+    printf("teststssssttt.\r\n");
+
     while(1){
         __chg_bgt_get_elk();
         if(nvInited){

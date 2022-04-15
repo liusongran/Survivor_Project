@@ -12,9 +12,9 @@
 
 //#define SRT
 //#define AR
-#define DIJ
+//#define DIJ
 //#define BC
-//#define RSA
+#define RSA
 //#define CK
 //#define CEM
 //#define CRC
