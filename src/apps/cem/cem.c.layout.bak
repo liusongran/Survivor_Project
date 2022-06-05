@@ -103,10 +103,10 @@ __shared(
 //)
 
 
-static sample_t acquire_sample(letter_t prev_sample) {
+static sample_t acquire_sample(letter_t prev_sample){
     letter_t sample = (prev_sample + 1) & 0x03;
     volatile uint32_t tempUsed = sample;
-    tempUsed = tempUsed * tempUsed;
+    tempUsed = tempUsed*tempUsed;
     tempUsed = sqrt(tempUsed);
     return sample;
 }
@@ -121,8 +121,8 @@ TASK(init)//0
     __SET(_v_letter_idx) = 0;
     __SET(_v_sample_count) = 1;
 
-    uint16_t j = __GET(_v_letter);;
-    for (j = 0; j < NUM_LETTERS; j++) {
+    uint16_t j=__GET(_v_letter);;
+    for(j=0;j<NUM_LETTERS;j++){
         //j = __GET(_v_letter);
         __SET(_v_dict[j].letter) = j ;
         __SET(_v_dict[j].sibling) =  NIL;
@@ -138,7 +138,7 @@ TASK(sample)//1
     unsigned next_letter_idx = __GET(_v_letter_idx) + 1;
     sample_t prev_sample;
     prev_sample = __GET(_v_prev_sample);
-
+    
 
     if (next_letter_idx == NUM_LETTERS_IN_SAMPLE)
         next_letter_idx = 0;
@@ -169,7 +169,7 @@ TASK(letterize)//2
     __SET(_v_letter) = letter;
     index_t parent = __GET(_v_parent_next);
     uint16_t __cry;
-    uint8_t testFlag = 0;
+    uint8_t testFlag=0;
     __cry = __GET(_v_dict[parent].child);
     __SET(_v_sibling) = __cry ;
     __cry = __GET(_v_dict[parent].letter);
@@ -185,7 +185,7 @@ TASK(letterize)//2
     uint8_t tskIdx = 0;
     index_t starting_node_idx;
     index_t next_sibling;
-    while (1) {
+    while(1){
         if (__GET(_v_sibling) != NIL) {
             int i = __GET(_v_sibling);
             uint16_t __cry = __GET(_v_letter);
@@ -193,130 +193,130 @@ TASK(letterize)//2
                 __cry = __GET(_v_sibling);
                 __SET(_v_parent_next) = __cry;
                 NEXT(2);
-            } else {
-                if (__GET(_v_dict[i].sibling) != 0) {
+            }else{
+                if(__GET(_v_dict[i].sibling) != 0){
                     __cry = __GET(_v_dict[i].sibling);
                     __SET(_v_sibling) = __cry;
-                } else {}
-                starting_node_idx = (index_t)__GET(_v_letter);
-                __SET(_v_parent_next) = starting_node_idx;
+                }else{}
+                    starting_node_idx = (index_t)__GET(_v_letter);
+                    __SET(_v_parent_next) = starting_node_idx;
 
-                if (__GET(_v_child) == NIL) {
-                    //NEXT(3);
-                    if (__GET(_v_node_count) == DICT_SIZE) { // wipe the table if full
-                        while (1);
-                    }
+                    if (__GET(_v_child) == NIL) {
+                        //NEXT(3);
+                        if (__GET(_v_node_count) == DICT_SIZE) { // wipe the table if full
+        while (1);
+    }
 
-                    index_t child = __GET(_v_node_count);
-                    uint16_t __cry;
-                    if (__GET(_v_parent_node.child) == NIL) { // the only child
+    index_t child = __GET(_v_node_count);
+    uint16_t __cry;
+    if (__GET(_v_parent_node.child) == NIL) { // the only child
 
-                        int i = __GET(_v_parent);
+        int i = __GET(_v_parent);
 
-                        __cry = __GET(_v_parent_node.letter);
-                        __SET(_v_dict[i].letter) = __cry;
-                        __cry  = __GET(_v_parent_node.sibling);
-                        __SET(_v_dict[i].sibling) = __cry;
-                        __cry = child;
-                        __SET(_v_dict[i].child) = __cry;
+        __cry = __GET(_v_parent_node.letter);
+        __SET(_v_dict[i].letter) = __cry;
+        __cry  = __GET(_v_parent_node.sibling);
+        __SET(_v_dict[i].sibling) = __cry;
+        __cry = child;
+        __SET(_v_dict[i].child) = __cry;
 
-                    } else { // a sibling
-                        index_t last_sibling = __GET(_v_sibling);
-                        __cry = __GET(_v_sibling_node.letter);
-                        __SET(_v_dict[last_sibling].letter) = __cry;
-                        __cry = child;
-                        __SET(_v_dict[last_sibling].sibling) = __cry;
-                        __cry  = __GET(_v_sibling_node.child);
-                        __SET(_v_dict[last_sibling].child) = __cry;
-                    }
-                    __cry = __GET(_v_letter);
-                    __SET(_v_dict[child].letter) = __cry;
-                    __SET(_v_dict[child].sibling) = NIL;
-                    __SET(_v_dict[child].child) = NIL;
-                    __cry = __GET(_v_parent);
-                    __SET(_v_symbol) = __cry;
-                    __SET(_v_node_count)++;
+    } else { // a sibling
+        index_t last_sibling = __GET(_v_sibling);
+        __cry = __GET(_v_sibling_node.letter);
+        __SET(_v_dict[last_sibling].letter) = __cry;
+        __cry = child;
+        __SET(_v_dict[last_sibling].sibling) = __cry;
+        __cry  = __GET(_v_sibling_node.child);
+        __SET(_v_dict[last_sibling].child) = __cry;
+    }
+    __cry = __GET(_v_letter);
+    __SET(_v_dict[child].letter) = __cry;
+    __SET(_v_dict[child].sibling) = NIL;
+    __SET(_v_dict[child].child) = NIL;
+    __cry = __GET(_v_parent);
+    __SET(_v_symbol) = __cry;
+    __SET(_v_node_count)++;
 
-                    //NEXT(5);
-                    //uint16_t __cry;
-                    int i = __GET(_v_out_len);
-                    __cry = __GET(_v_symbol);
-                    __SET(_v_compressed_data[i].letter) = __cry;
-                    __SET(_v_out_len)++;
+    //NEXT(5);
+    //uint16_t __cry;
+    int i = __GET(_v_out_len);
+    __cry = __GET(_v_symbol);
+    __SET(_v_compressed_data[i].letter) = __cry;
+    __SET(_v_out_len)++;
 
-                    if ( (__GET(_v_out_len)) == BLOCK_SIZE) {
-                        NEXT(3);
+    if ( (__GET(_v_out_len)) == BLOCK_SIZE) {
+        NEXT(3);
+    } else {
+        NEXT(1);
+    }
                     } else {
-                        NEXT(1);
-                    }
-                } else {
-
-                    while (1) {
-                        i = __GET(_v_sibling);
-                        if (__GET(_v_dict[i].sibling) != NIL) {
-                            next_sibling = __GET(_v_dict[i].sibling);
-                            __SET(_v_sibling) = next_sibling;
-                        } else {
-                            break;
+                        
+                        while(1){
+                            i = __GET(_v_sibling);
+                            if(__GET(_v_dict[i].sibling) != NIL){
+                                next_sibling = __GET(_v_dict[i].sibling);
+                                __SET(_v_sibling) = next_sibling;
+                            }else{
+                                break;
+                            }
                         }
+                        __cry = __GET(_v_dict[i].letter);
+                        __SET(_v_sibling_node.letter) = __cry;
+                        __cry = __GET(_v_dict[i].sibling);
+                        __SET(_v_sibling_node.sibling) = __cry;
+                        __cry = __GET(_v_dict[i].child);
+                        __SET(_v_sibling_node.child) = __cry;
+                        //NEXT(3);
+                        if (__GET(_v_node_count) == DICT_SIZE) { // wipe the table if full
+        while (1);
+    }
+
+    index_t child = __GET(_v_node_count);
+    uint16_t __cry;
+    if (__GET(_v_parent_node.child) == NIL) { // the only child
+
+        int i = __GET(_v_parent);
+
+        __cry = __GET(_v_parent_node.letter);
+        __SET(_v_dict[i].letter) = __cry;
+        __cry  = __GET(_v_parent_node.sibling);
+        __SET(_v_dict[i].sibling) = __cry;
+        __cry = child;
+        __SET(_v_dict[i].child) = __cry;
+
+    } else { // a sibling
+        index_t last_sibling = __GET(_v_sibling);
+        __cry = __GET(_v_sibling_node.letter);
+        __SET(_v_dict[last_sibling].letter) = __cry;
+        __cry = child;
+        __SET(_v_dict[last_sibling].sibling) = __cry;
+        __cry  = __GET(_v_sibling_node.child);
+        __SET(_v_dict[last_sibling].child) = __cry;
+    }
+    __cry = __GET(_v_letter);
+    __SET(_v_dict[child].letter) = __cry;
+    __SET(_v_dict[child].sibling) = NIL;
+    __SET(_v_dict[child].child) = NIL;
+    __cry = __GET(_v_parent);
+    __SET(_v_symbol) = __cry;
+    __SET(_v_node_count)++;
+
+    //NEXT(5);
+    //uint16_t __cry;
+    int i = __GET(_v_out_len);
+    __cry = __GET(_v_symbol);
+    __SET(_v_compressed_data[i].letter) = __cry;
+    __SET(_v_out_len)++;
+
+    if ( (__GET(_v_out_len)) == BLOCK_SIZE) {
+        NEXT(3);
+    } else {
+        NEXT(1);
+    }
+
                     }
-                    __cry = __GET(_v_dict[i].letter);
-                    __SET(_v_sibling_node.letter) = __cry;
-                    __cry = __GET(_v_dict[i].sibling);
-                    __SET(_v_sibling_node.sibling) = __cry;
-                    __cry = __GET(_v_dict[i].child);
-                    __SET(_v_sibling_node.child) = __cry;
-                    //NEXT(3);
-                    if (__GET(_v_node_count) == DICT_SIZE) { // wipe the table if full
-                        while (1);
-                    }
-
-                    index_t child = __GET(_v_node_count);
-                    uint16_t __cry;
-                    if (__GET(_v_parent_node.child) == NIL) { // the only child
-
-                        int i = __GET(_v_parent);
-
-                        __cry = __GET(_v_parent_node.letter);
-                        __SET(_v_dict[i].letter) = __cry;
-                        __cry  = __GET(_v_parent_node.sibling);
-                        __SET(_v_dict[i].sibling) = __cry;
-                        __cry = child;
-                        __SET(_v_dict[i].child) = __cry;
-
-                    } else { // a sibling
-                        index_t last_sibling = __GET(_v_sibling);
-                        __cry = __GET(_v_sibling_node.letter);
-                        __SET(_v_dict[last_sibling].letter) = __cry;
-                        __cry = child;
-                        __SET(_v_dict[last_sibling].sibling) = __cry;
-                        __cry  = __GET(_v_sibling_node.child);
-                        __SET(_v_dict[last_sibling].child) = __cry;
-                    }
-                    __cry = __GET(_v_letter);
-                    __SET(_v_dict[child].letter) = __cry;
-                    __SET(_v_dict[child].sibling) = NIL;
-                    __SET(_v_dict[child].child) = NIL;
-                    __cry = __GET(_v_parent);
-                    __SET(_v_symbol) = __cry;
-                    __SET(_v_node_count)++;
-
-                    //NEXT(5);
-                    //uint16_t __cry;
-                    int i = __GET(_v_out_len);
-                    __cry = __GET(_v_symbol);
-                    __SET(_v_compressed_data[i].letter) = __cry;
-                    __SET(_v_out_len)++;
-
-                    if ( (__GET(_v_out_len)) == BLOCK_SIZE) {
-                        NEXT(3);
-                    } else {
-                        NEXT(1);
-                    }
-
-                }
             }
-        } else {
+        }else{
             break;
         }
     }
@@ -326,117 +326,117 @@ TASK(letterize)//2
     if (__GET(_v_child) == NIL) {
         //NEXT(3);
         if (__GET(_v_node_count) == DICT_SIZE) { // wipe the table if full
-            while (1);
-        }
+        while (1);
+    }
 
-        index_t child = __GET(_v_node_count);
-        uint16_t __cry;
-        if (__GET(_v_parent_node.child) == NIL) { // the only child
+    index_t child = __GET(_v_node_count);
+    uint16_t __cry;
+    if (__GET(_v_parent_node.child) == NIL) { // the only child
 
-            int i = __GET(_v_parent);
+        int i = __GET(_v_parent);
 
-            __cry = __GET(_v_parent_node.letter);
-            __SET(_v_dict[i].letter) = __cry;
-            __cry  = __GET(_v_parent_node.sibling);
-            __SET(_v_dict[i].sibling) = __cry;
-            __cry = child;
-            __SET(_v_dict[i].child) = __cry;
+        __cry = __GET(_v_parent_node.letter);
+        __SET(_v_dict[i].letter) = __cry;
+        __cry  = __GET(_v_parent_node.sibling);
+        __SET(_v_dict[i].sibling) = __cry;
+        __cry = child;
+        __SET(_v_dict[i].child) = __cry;
 
-        } else { // a sibling
-            index_t last_sibling = __GET(_v_sibling);
-            __cry = __GET(_v_sibling_node.letter);
-            __SET(_v_dict[last_sibling].letter) = __cry;
-            __cry = child;
-            __SET(_v_dict[last_sibling].sibling) = __cry;
-            __cry  = __GET(_v_sibling_node.child);
-            __SET(_v_dict[last_sibling].child) = __cry;
-        }
-        __cry = __GET(_v_letter);
-        __SET(_v_dict[child].letter) = __cry;
-        __SET(_v_dict[child].sibling) = NIL;
-        __SET(_v_dict[child].child) = NIL;
-        __cry = __GET(_v_parent);
-        __SET(_v_symbol) = __cry;
-        __SET(_v_node_count)++;
+    } else { // a sibling
+        index_t last_sibling = __GET(_v_sibling);
+        __cry = __GET(_v_sibling_node.letter);
+        __SET(_v_dict[last_sibling].letter) = __cry;
+        __cry = child;
+        __SET(_v_dict[last_sibling].sibling) = __cry;
+        __cry  = __GET(_v_sibling_node.child);
+        __SET(_v_dict[last_sibling].child) = __cry;
+    }
+    __cry = __GET(_v_letter);
+    __SET(_v_dict[child].letter) = __cry;
+    __SET(_v_dict[child].sibling) = NIL;
+    __SET(_v_dict[child].child) = NIL;
+    __cry = __GET(_v_parent);
+    __SET(_v_symbol) = __cry;
+    __SET(_v_node_count)++;
 
-        //NEXT(5);
-        //uint16_t __cry;
-        int i = __GET(_v_out_len);
-        __cry = __GET(_v_symbol);
-        __SET(_v_compressed_data[i].letter) = __cry;
-        __SET(_v_out_len)++;
+    //NEXT(5);
+    //uint16_t __cry;
+    int i = __GET(_v_out_len);
+    __cry = __GET(_v_symbol);
+    __SET(_v_compressed_data[i].letter) = __cry;
+    __SET(_v_out_len)++;
 
-        if ( (__GET(_v_out_len)) == BLOCK_SIZE) {
-            NEXT(3);
-        } else {
-            NEXT(1);
-        }
+    if ( (__GET(_v_out_len)) == BLOCK_SIZE) {
+        NEXT(3);
+    } else {
+        NEXT(1);
+    }
     }
     else {
-
+        
         int i;
-        while (1) {
-            i = __GET(_v_sibling);
-            if (__GET(_v_dict[i].sibling) != NIL) {
-                next_sibling = __GET(_v_dict[i].sibling);
-                __SET(_v_sibling) = next_sibling;
-            } else {
-                break;
-            }
-        }
-        __cry = __GET(_v_dict[i].letter);
-        __SET(_v_sibling_node.letter) = __cry;
-        __cry = __GET(_v_dict[i].sibling);
-        __SET(_v_sibling_node.sibling) = __cry;
-        __cry = __GET(_v_dict[i].child);
-        __SET(_v_sibling_node.child) = __cry;
-        //NEXT(3);
-        if (__GET(_v_node_count) == DICT_SIZE) { // wipe the table if full
-            while (1);
-        }
+                        while(1){
+                            i = __GET(_v_sibling);
+                            if(__GET(_v_dict[i].sibling) != NIL){
+                                next_sibling = __GET(_v_dict[i].sibling);
+                                __SET(_v_sibling) = next_sibling;
+                            }else{
+                                break;
+                            }
+                        }
+                        __cry = __GET(_v_dict[i].letter);
+                        __SET(_v_sibling_node.letter) = __cry;
+                        __cry = __GET(_v_dict[i].sibling);
+                        __SET(_v_sibling_node.sibling) = __cry;
+                        __cry = __GET(_v_dict[i].child);
+                        __SET(_v_sibling_node.child) = __cry;
+                        //NEXT(3);
+                        if (__GET(_v_node_count) == DICT_SIZE) { // wipe the table if full
+        while (1);
+    }
 
-        index_t child = __GET(_v_node_count);
-        uint16_t __cry;
-        if (__GET(_v_parent_node.child) == NIL) { // the only child
+    index_t child = __GET(_v_node_count);
+    uint16_t __cry;
+    if (__GET(_v_parent_node.child) == NIL) { // the only child
 
-            int i = __GET(_v_parent);
+        int i = __GET(_v_parent);
 
-            __cry = __GET(_v_parent_node.letter);
-            __SET(_v_dict[i].letter) = __cry;
-            __cry  = __GET(_v_parent_node.sibling);
-            __SET(_v_dict[i].sibling) = __cry;
-            __cry = child;
-            __SET(_v_dict[i].child) = __cry;
+        __cry = __GET(_v_parent_node.letter);
+        __SET(_v_dict[i].letter) = __cry;
+        __cry  = __GET(_v_parent_node.sibling);
+        __SET(_v_dict[i].sibling) = __cry;
+        __cry = child;
+        __SET(_v_dict[i].child) = __cry;
 
-        } else { // a sibling
-            index_t last_sibling = __GET(_v_sibling);
-            __cry = __GET(_v_sibling_node.letter);
-            __SET(_v_dict[last_sibling].letter) = __cry;
-            __cry = child;
-            __SET(_v_dict[last_sibling].sibling) = __cry;
-            __cry  = __GET(_v_sibling_node.child);
-            __SET(_v_dict[last_sibling].child) = __cry;
-        }
-        __cry = __GET(_v_letter);
-        __SET(_v_dict[child].letter) = __cry;
-        __SET(_v_dict[child].sibling) = NIL;
-        __SET(_v_dict[child].child) = NIL;
-        __cry = __GET(_v_parent);
-        __SET(_v_symbol) = __cry;
-        __SET(_v_node_count)++;
+    } else { // a sibling
+        index_t last_sibling = __GET(_v_sibling);
+        __cry = __GET(_v_sibling_node.letter);
+        __SET(_v_dict[last_sibling].letter) = __cry;
+        __cry = child;
+        __SET(_v_dict[last_sibling].sibling) = __cry;
+        __cry  = __GET(_v_sibling_node.child);
+        __SET(_v_dict[last_sibling].child) = __cry;
+    }
+    __cry = __GET(_v_letter);
+    __SET(_v_dict[child].letter) = __cry;
+    __SET(_v_dict[child].sibling) = NIL;
+    __SET(_v_dict[child].child) = NIL;
+    __cry = __GET(_v_parent);
+    __SET(_v_symbol) = __cry;
+    __SET(_v_node_count)++;
 
-        //NEXT(5);
-        //uint16_t __cry;
-        i = __GET(_v_out_len);
-        __cry = __GET(_v_symbol);
-        __SET(_v_compressed_data[i].letter) = __cry;
-        __SET(_v_out_len)++;
+    //NEXT(5);
+    //uint16_t __cry;
+i = __GET(_v_out_len);
+    __cry = __GET(_v_symbol);
+    __SET(_v_compressed_data[i].letter) = __cry;
+    __SET(_v_out_len)++;
 
-        if ( (__GET(_v_out_len)) == BLOCK_SIZE) {
-            NEXT(3);
-        } else {
-            NEXT(1);
-        }
+    if ( (__GET(_v_out_len)) == BLOCK_SIZE) {
+        NEXT(3);
+    } else {
+        NEXT(1);
+    }
     }
 }
 
@@ -529,8 +529,14 @@ void _benchmark_cem_init(void)
     __THREAD(0);
 
     // min:[[204, 602], [208, 212], [0, 608], [0, 0]]
-
-
+    //    |APP num:1.
+    //    |InitSum:0(100us)
+    //    |BackupSum:55(100us)
+    //    |CksumSum:250(100us)
+    //    |UpdateSum:135(100us)
+    //    |TaskSum:84(100us), num:90.
+    //    |VerifySum:25(100us)
+    //    |Total:551(100us)
 
     // max:[[0, 608], [0, 610], [0, 610], [0, 0]]
     //    |APP num:1.
@@ -544,18 +550,18 @@ void _benchmark_cem_init(void)
 
     //TASK_INIT(TASK_PRI,initTask,5,may_war_set_crc[0][0],may_war_set_crc[0][1],TASK_breaking_crc[0]);
 
-    TASK_INIT(TASK_PRI, init,                 204,  602);
+    TASK_INIT(TASK_PRI,init,                 204,  602);
     //TASK_INIT(TASK_PRI,init_dict,            0,  1);
-    TASK_INIT(TASK_PRI, sample,               0,  610);
+    TASK_INIT(TASK_PRI,sample,               208,  212);
     //TASK_INIT(TASK_PRI,measure_temp,         0,  1);
-    TASK_INIT(TASK_PRI, letterize,            0,  608);
+    TASK_INIT(TASK_PRI,letterize,            0,  608);
     //TASK_INIT(TASK_PRI,compress,             0,  1);
     //TASK_INIT(TASK_PRI,find_sibling, 0,  1);
     //TASK_INIT(TASK_PRI,add_node, 0,  1);
     //TASK_INIT(TASK_PRI,add_insert, 0,  1);
     //TASK_INIT(TASK_PRI,append_compressed, 0,  1);
     //TASK_INIT(TASK_PRI,print, 1,may_war_set_cem[10][0],may_war_set_cem[10][1],TASK_breaking_cem[10]);
-    TASK_INIT(TASK_PRI, done, 0,  0);
+    TASK_INIT(TASK_PRI,done, 0,  0);
 
 }
 

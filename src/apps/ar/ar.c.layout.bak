@@ -9,7 +9,7 @@ unsigned _v_seed;
 // Number of samples to discard before recording training set
 #define NUM_WARMUP_SAMPLES 6
 #define ACCEL_WINDOW_SIZE 24
-#define MODEL_SIZE 64
+#define MODEL_SIZE 32
 #define SAMPLE_NOISE_FLOOR 10 // TODO: made up value
 
 // Number of classifications to complete in one experiment
@@ -50,23 +50,23 @@ TASK(task_idle);            //-(10)
 /**
  * 2. Shared variable declaration here. (164 bytes)
  */
-__shared(
-    uint16_t _v_pinState;                       //-[1]:2
-    unsigned _v_discardedSamplesCount;          //-[2]:2
-    class_t _v_class;                           //-[3]:
-    unsigned _v_totalCount;                     //-[4]:2
-    unsigned _v_movingCount;                    //-[5]:2
-    unsigned _v_stationaryCount;                //-[6]:2
-    accelReading _v_window[ACCEL_WINDOW_SIZE];  //-[7]:72
-    features_t _v_features;                     //-[8]:4
-    unsigned _v_trainingSetSize;                //-[9]:2
-    unsigned _v_samplesInWindow;                //-[10]:2
-    run_mode_t _v_mode;                         //-[11]:4
-    unsigned _v_seed;                           //-[12]:2
-    unsigned _v_count;                          //-[13]:2 ----98
-    features_t _v_model_stationary[MODEL_SIZE]; //-[14]:32*4 = 128  64*4 = 256  ----354
-    features_t _v_model_moving[MODEL_SIZE];     //-[15]:32*4 = 128  64*4 = 256  ----610
-)
+//__shared(
+//    uint16_t _v_pinState;                       //-[1]:2
+//    unsigned _v_discardedSamplesCount;          //-[2]:2
+//    class_t _v_class;                           //-[3]:
+//    unsigned _v_totalCount;                     //-[4]:2
+//    unsigned _v_movingCount;                    //-[5]:2
+//    unsigned _v_stationaryCount;                //-[6]:2
+//    accelReading _v_window[ACCEL_WINDOW_SIZE];  //-[7]:12
+//    features_t _v_features;                     //-[8]:4
+//    unsigned _v_trainingSetSize;                //-[9]:2
+//    unsigned _v_samplesInWindow;                //-[10]:2
+//    run_mode_t _v_mode;                         //-[11]:4
+//    unsigned _v_seed;                           //-[12]:2
+//    unsigned _v_count;                          //-[13]:2
+//    features_t _v_model_stationary[MODEL_SIZE]; //-[14]:64
+//    features_t _v_model_moving[MODEL_SIZE];     //-[15]:64
+//)
 
 //MIN
 // redVerSum 234
@@ -143,23 +143,23 @@ __shared(
 // IntervalNum 2
 // totalResult 14.569060773480663
 //Solution [12.  7.  2.  5.  9.  1. 14. 15. 11.  6.  8. 10.  4. 13.  3.]
-//__shared(
-//    unsigned _v_seed;                           //-[12]:2
-//    accelReading _v_window[ACCEL_WINDOW_SIZE];  //-[7]:12
-//    unsigned _v_discardedSamplesCount;          //-[2]:2
-//    unsigned _v_movingCount;                    //-[5]:2
-//    unsigned _v_trainingSetSize;                //-[9]:2
-//    uint16_t _v_pinState;                       //-[1]:2
-//    features_t _v_model_stationary[MODEL_SIZE]; //-[14]:64
-//    features_t _v_model_moving[MODEL_SIZE];     //-[15]:64
-//    run_mode_t _v_mode;                         //-[11]:4
-//    unsigned _v_stationaryCount;                //-[6]:2
-//    features_t _v_features;                     //-[8]:4
-//    unsigned _v_samplesInWindow;                //-[10]:2
-//    unsigned _v_totalCount;                     //-[4]:2
-//    unsigned _v_count;                          //-[13]:2
-//    class_t _v_class;                           //-[3]:
-//)
+__shared(
+    unsigned _v_seed;                           //-[12]:2
+    accelReading _v_window[ACCEL_WINDOW_SIZE];  //-[7]:12
+    unsigned _v_discardedSamplesCount;          //-[2]:2
+    unsigned _v_movingCount;                    //-[5]:2
+    unsigned _v_trainingSetSize;                //-[9]:2
+    uint16_t _v_pinState;                       //-[1]:2
+    features_t _v_model_stationary[MODEL_SIZE]; //-[14]:64
+    features_t _v_model_moving[MODEL_SIZE];     //-[15]:64
+    run_mode_t _v_mode;                         //-[11]:4
+    unsigned _v_stationaryCount;                //-[6]:2
+    features_t _v_features;                     //-[8]:4
+    unsigned _v_samplesInWindow;                //-[10]:2
+    unsigned _v_totalCount;                     //-[4]:2
+    unsigned _v_count;                          //-[13]:2
+    class_t _v_class;                           //-[3]:
+)
 
 //MAX-interval
 //Solution [ 5.  9. 12. 13. 11. 14. 10.  3. 15.  7.  2.  1.  4.  6.  8.]
@@ -454,108 +454,18 @@ extern buffer_idx_t elkBufIdx;
 void _benchmark_ar_init() {
     if (!nvInited) {
         __THREAD(0);
-
-        
-        //        |APP num:1.
-        //        |InitSum:0(100us)
-        //        |BackupSum:92(100us)
-        //        |CksumSum:333(100us)
-        //        |UpdateSum:201(100us)
-        //        |TaskSum:2365(100us), num:231.
-        //        |VerifySum:105(100us)
-        //        |Total:3097(100us)
-        //         TASK_INIT(0, task_init,             0,      353,     0,       0,     0,     97,     98);  //0
-        //         TASK_INIT(0, task_selectMode,       0,      353,     0,      95,     0,     97,     98);  //1
-        //         TASK_INIT(0, task_sample,           0,      353,    38,     353,     0,     97,     98);
-        //         TASK_INIT(0, task_idle,             0,      353,    96,      97,     0,      5,      2);   //10
-                 
-                 //        |APP num:1.
-                 //        |InitSum:0(100us)
-                 //        |BackupSum:129(100us)
-                 //        |CksumSum:439(100us)
-                 //        |UpdateSum:170(100us)
-                 //        |TaskSum:2361(100us), num:231.
-                 //        |VerifySum:78(100us)
-                 //        |Total:3179(100us)
-                 //         TASK_INIT(0, task_init,             0,      353,     0,       0,     0,     353,     354);  //0
-                 //         TASK_INIT(0, task_selectMode,       0,      353,     0,      95,     0,     353,     354);  //1
-                 //         TASK_INIT(0, task_sample,           0,      353,    38,     353,     0,     353,     354);
-                 //         TASK_INIT(0, task_idle,             0,      353,    96,      97,     0,     353,     354);   //10
-        
-        // |APP num:1.
-        // |InitSum:0(100us)
-        // |BackupSum:97(100us)
-        // |CksumSum:394(100us)
-        // |UpdateSum:184(100us)
-        // |TaskSum:2356(100us), num:231.
-        // |VerifySum:68(100us)
-        // |Total:3101(100us)
- //        TASK_INIT(0, task_init,             0,  121);         //0
- //        TASK_INIT(0, task_selectMode,       0, 161);          //1
- //        TASK_INIT(0, task_sample,           38,  353);
- //        TASK_INIT(0, task_idle,             0,  0);          //10
-        
-        // |APP num:1.
-        // |InitSum:0(100us)
-        // |BackupSum:92(100us)
-        // |CksumSum:345(100us)
-        // |UpdateSum:221(100us)
-        // |TaskSum:2365(100us), num:231.
-        // |VerifySum:119(100us)
-        // |Total:3144(100us)
-         // TASK_INIT(0, task_init,             0,      97,     0,      0,      0,     97,     98);  //0
-         // TASK_INIT(0, task_selectMode,       0,      97,     0,      95,     0,     97,     98);  //1
-         // TASK_INIT(0, task_sample,           4,      353,    38,     353,    4,     97,     94);
-         // TASK_INIT(0, task_idle,             4,      97,     96,     97,     4,     5,      2);   //10
-        
-        
-//        |APP num:1.
-//        |InitSum:0(100us)
-//        |BackupSum:105(100us)
-//        |CksumSum:394(100us)
-//        |UpdateSum:252(100us)
-//        |TaskSum:3635(100us), num:263.
-//        |VerifySum:135(100us)
-//        |Total:4523(100us)
-//         TASK_INIT(0, task_init,             0,      97,     0,      0,      0,     97,     98);  //0
-//         TASK_INIT(0, task_selectMode,       0,      97,     0,      95,     0,     97,     98);  //1
-//         TASK_INIT(0, task_sample,           4,      609,    38,     609,    4,     97,     94);
-//         TASK_INIT(0, task_idle,             4,      97,     96,     97,     4,     5,      2);   //10
-
-//        |APP num:1.
-//        |InitSum:0(100us)
-//        |BackupSum:105(100us)
-//        |CksumSum:381(100us)
-//        |UpdateSum:229(100us)
-//        |TaskSum:3635(100us), num:263.
-//        |VerifySum:120(100us)
-//        |Total:4472(100us)
-//        TASK_INIT(0, task_init,             0,      609,     0,       0,     0,     97,     98);  //0
-//        TASK_INIT(0, task_selectMode,       0,      609,     0,      95,     0,     97,     98);  //1
-//        TASK_INIT(0, task_sample,           0,      609,    38,     609,     0,     97,     98);
-//        TASK_INIT(0, task_idle,             0,      609,    96,      97,     4,     5,       2);   //10
-
-        TASK_INIT(0, task_init,             0,      609,     0,       609,     0,     609,     610);  //0
-        TASK_INIT(0, task_selectMode,       0,      609,     0,      609,     0,     609,     610);  //1
-        TASK_INIT(0, task_sample,           0,      609,    0,     609,     0,     609,     610);
-        TASK_INIT(0, task_idle,             0,      609,    0,      609,     0,     609,       610);   //10
-
-
-//        |APP num:1.
-//        |InitSum:0(100us)
-//        |BackupSum:189(100us)
-//        |CksumSum:731(100us)
-//        |UpdateSum:194(100us)
-//        |TaskSum:3630(100us), num:263.
-//        |VerifySum:89(100us)
-//        |Total:4835(100us)
-//         TASK_INIT(0, task_init,             0,      609,     0,       0,     0,     609,     609);  //0
-//         TASK_INIT(0, task_selectMode,       0,      609,     0,      95,     0,     609,     609);  //1
-//         TASK_INIT(0, task_sample,           0,      609,    38,     609,     0,     609,     609);
-//         TASK_INIT(0, task_idle,             0,      609,    96,      97,     0,     609,     609);   //10
-//
-
-
+       // |APP num:1.
+       // |InitSum:0(100us)
+       // |BackupSum:97(100us)
+       // |CksumSum:394(100us)
+       // |UpdateSum:184(100us)
+       // |TaskSum:2356(100us), num:231.
+       // |VerifySum:68(100us)
+       // |Total:3101(100us)
+//        TASK_INIT(0, task_init,             0,  121);         //0
+//        TASK_INIT(0, task_selectMode,       0, 161);          //1
+//        TASK_INIT(0, task_sample,           38,  353);
+//        TASK_INIT(0, task_idle,             0,  0);          //10
 
        // MIN [[0, 81], [0, 353], [4, 345], [0, 353]]
        // |APP num:1.
@@ -608,36 +518,10 @@ void _benchmark_ar_init() {
         // |TaskSum:2348(100us), num:231.
         // |VerifySum:55(100us)
         // |Total:3093(100us)
-//        TASK_INIT(0, task_init,             0,      353);         //0
-//        TASK_INIT(0, task_selectMode,       0,      353);          //1
-//        TASK_INIT(0, task_sample,           0,      353);
-//        TASK_INIT(0, task_idle,             350,    353);          //10
-//        |APP num:1.
-//        |InitSum:0(100us)
-//        |BackupSum:128(100us)
-//        |CksumSum:437(100us)
-//        |UpdateSum:180(100us)
-//        |TaskSum:2348(100us), num:231.
-//        |VerifySum:78(100us)
-//        |Total:3172(100us)
-//        TASK_INIT(0, task_init,             0,      353,     0,      353,      0,      353,     354);  //0
-//        TASK_INIT(0, task_selectMode,       0,      353,     0,      353,      0,      349,     350);  //1
-//        TASK_INIT(0, task_sample,           0,      353,     0,      353,      0,      353,     354);
-//        TASK_INIT(0, task_idle,             350,    353,     350,    353,      0,        0,       0);   //10
-//
-//        |APP num:1.
-//        |InitSum:0(100us)
-//        |BackupSum:131(100us)
-//        |CksumSum:442(100us)
-//        |UpdateSum:160(100us)
-//        |TaskSum:2339(100us), num:231.
-//        |VerifySum:80(100us)
-//        |Total:3154(100us)
-//        TASK_INIT(0, task_init,             0,      353,     0,      353,      0,      353,     354);  //0
-//        TASK_INIT(0, task_selectMode,       0,      353,     0,      353,      0,      353,     354);  //1
-//        TASK_INIT(0, task_sample,           0,      353,     0,      353,      0,      353,     354);
-//        TASK_INIT(0, task_idle,             0,      353,     0,      353,      0,      353,     354);   //10
-
+        TASK_INIT(0, task_init,             0,      353);         //0
+        TASK_INIT(0, task_selectMode,       0,      353);          //1
+        TASK_INIT(0, task_sample,           0,      353);
+        TASK_INIT(0, task_idle,             350,    353);          //10
 
         // MAX-interval [[4, 345], [0, 349], [2, 353], [6, 347]]
         // |APP num:1.

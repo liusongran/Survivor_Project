@@ -362,7 +362,7 @@ TASK(task_fft_epilogue){
 }
 
 TASK(task_done){
-    if(__GET(iteration)>10000)
+    if(__GET(iteration)>100) //10000
     {
         NEXT(0);
     }else{
