@@ -9,8 +9,9 @@ inline uint8_t findEmptyNode()
 {
     int i = 0;
     uint16_t tempCnter = 0;
-    uint8_t workingBufIdx = elkBufIdx._idx;
-    uint16_t tempBitmap = elkNodeBitmaps[2] | elkNodeBitmaps[workingBufIdx];
+    uint8_t dualIdx = elkDualIdx._idx;          //working on working dual idx
+    // uint8_t workingBufIdx = elkBufIdx._idx;
+    uint16_t tempBitmap = elkNodeBitmaps[2] | elkNodeBitmaps[dualIdx];
 
     for (i=0; i<16; i++){
         if(!(GET_BIT(tempBitmap,tempCnter))){
@@ -213,7 +214,7 @@ void _elk_dynamic_crc_lower(uint16_t    addrStart,   \
 
 
 
-uint16_t _elk_crc(  uint16_t offsetStart,   \ 
+uint16_t _elk_crc(  uint16_t offsetStart,   \
                     uint16_t offsetEnd,     \
                     uint8_t bufIdx)
 {
@@ -244,10 +245,12 @@ void _elk_normal_cksum( uint16_t tgtIntvlStart, \
     uint8_t tempNodeIdx = 0;
     uint16_t tempSubCksum = 0;
     uint16_t tempStart, tempEnd;
+
+    uint8_t dualIdx = elkDualIdx._idx;          //working on working dual idx
     uint8_t workingBufIdx = elkBufIdx._idx;         //working on working-buffer
 
     elkNodeBitmaps[2]=0;
-//|srliu:| go across multiple intervals
+    //|srliu:| go across multiple intervals
     if(svIdxIntvlStart!=svIdxIntvlEnd){
         //---|step1|:seg-upper
         tempStart = elkListNodes[svIdxIntvlStart].intvlStart;       //start offset of start-interval
@@ -268,7 +271,7 @@ void _elk_normal_cksum( uint16_t tgtIntvlStart, \
             _elk_dynamic_crc_lower(tempStart, tgtIntvlEnd, tempEnd, svIdxIntvlEnd);
         }
         //---|step4|:
-        _elk_dlist_replace_mtom(svIdxIntvlStart, svIdxIntvlEnd, elkNodeBitmaps[2], workingBufIdx);
+        _elk_dlist_replace_mtom(svIdxIntvlStart, svIdxIntvlEnd, elkNodeBitmaps[2], dualIdx);
 //|srliu| in the same interval
     }else{
         tempStart   = elkListNodes[svIdxIntvlStart].intvlStart;     //start offset of base interval
@@ -279,7 +282,7 @@ void _elk_normal_cksum( uint16_t tgtIntvlStart, \
             tempNodeIdx     = findEmptyNode();
             listNodeBackup(svIdxIntvlStart, tempNodeIdx);
             elkListNodes[tempNodeIdx].subCksum = tempSubCksum;
-            _elk_dlist_replace_1to1(svIdxIntvlStart, elkNodeBitmaps[2], workingBufIdx);
+            _elk_dlist_replace_1to1(svIdxIntvlStart, elkNodeBitmaps[2], dualIdx);
 //--|srliu| interval splitting
         }else{
             //---|step1|:seg-upper
@@ -297,7 +300,7 @@ void _elk_normal_cksum( uint16_t tgtIntvlStart, \
                 _elk_dynamic_crc_lower(tempStart, tgtIntvlEnd, tempEnd, svIdxIntvlEnd);
             }
             //---|step4|:
-            _elk_dlist_replace_1tom(svIdxIntvlStart, elkNodeBitmaps[2], workingBufIdx);
+            _elk_dlist_replace_1tom(svIdxIntvlStart, elkNodeBitmaps[2], dualIdx);
         }
     }
     //DEBUG:

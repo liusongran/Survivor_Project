@@ -9,6 +9,8 @@
  */
 __nv thread_t _threads[MAX_THREAD_NUM];
 __nv buffer_idx_t elkBufIdx;                        //this to nv
+__nv buffer_idx_t elkDualIdx;                        //this to nv
+
 __nv uint8_t elkCurTaskID = 0;                      //this in elk
 __elk_du list_node_t elkListNodes[MAX_SUB_CKSUM_NUM];
 __elk_du elk_list_t elkDualList[2];
@@ -106,7 +108,7 @@ PRB_END(backup)
 #endif
 //NOTE: Step3 - task
 PRB_START(task)
-            tempTaskID = (uint8_t)((taskfun_t)(_threads[0].task_array[elkCurTaskID].fun_entry))(_threads[0].buffer.buf[elkBufIdx._idx]);
+            tempTaskID = (uint8_t)((taskfun_t)(_threads[0].task_array[elkCurTaskID].fun_entry))(_threads[0].buffer.buf[1]);
 PRB_END(task)
             nvTaskNum++;
 #if TRACE_TASK==1

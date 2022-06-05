@@ -3,7 +3,8 @@
 #include <stdint.h>
 //#define CRC32                   //use this as default. comment it to use CRC16.
 
-#define MAX_SUB_CKSUM_NUM   8
+//ADPCM:4; AR:15; BC:10; CEM:16; CRC:2; CUCKOO:14; DIJ:7; FFT:5; SORT:4;  RSA:25;
+#define MAX_SUB_CKSUM_NUM   15
 #define MAX_CKSUM_TAB_NUM   128
 
 typedef struct{

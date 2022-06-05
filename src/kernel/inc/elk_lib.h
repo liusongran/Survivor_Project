@@ -16,6 +16,8 @@
 //#define NULL ((void *)0)
 
 extern  buffer_idx_t elkBufIdx;
+extern  buffer_idx_t elkDualIdx;
+
 extern  uint16_t     elkNodeBitmaps[3];
 extern  elk_list_t   elkDualList[2];
 

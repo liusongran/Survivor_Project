@@ -14,7 +14,7 @@ void __create_thread(uint8_t priority, void *data_org, void *data_temp, uint16_t
 /**-------------------*/
 /** Init. a new TASK. */
 // @para. addr_length: in word(2bytes)
-void __init_task(uint8_t priority, void *task_entry, uint16_t start_used_offset, uint16_t end_used_offset){
+void __init_task(uint8_t priority, void *task_entry, uint16_t start_used_offset, uint16_t end_used_offset, uint16_t start_verify_offset, uint16_t end_verify_offset, uint16_t start_backup_offset, uint16_t end_backup_offset, uint16_t backup_size){
     uint16_t temp_index;
 
     temp_index = _threads[priority].idx_of_first_empty_task;
@@ -22,5 +22,12 @@ void __init_task(uint8_t priority, void *task_entry, uint16_t start_used_offset,
     _threads[priority].task_array[temp_index].task_idx = temp_index;
     _threads[priority].task_array[temp_index].ck_set.start_used_offset = start_used_offset;
     _threads[priority].task_array[temp_index].ck_set.end_used_offset = end_used_offset;
+    
+    _threads[priority].task_array[temp_index].ck_set.start_backup_offset = start_backup_offset;
+    _threads[priority].task_array[temp_index].ck_set.end_backup_offset = end_backup_offset;
+    _threads[priority].task_array[temp_index].ck_set.start_verify_offset = start_verify_offset;
+    _threads[priority].task_array[temp_index].ck_set.end_verify_offset = end_verify_offset;
+    _threads[priority].task_array[temp_index].ck_set.backup_size = backup_size;
+
     _threads[priority].idx_of_first_empty_task++;
 }
