@@ -115,7 +115,7 @@ PRB_END(task)
             printk("%lu. total:%u.\r\n",delta,nvTaskNum);
 #endif
 #if (DEBUG_TASK==1)
-            printf("|!!!3.|running|intvStart:%d, intvEnd:%d.\r\n", _threads[0].task_array[elkCurTaskID].ck_set.start_used_offset, _threads[0].task_array[elkCurTaskID].ck_set.end_used_offset);
+            printf("|!!!3.|running|intvStart:%d, intvEnd:%d.\r\n", _threads[0].task_array[elkCurTaskID].ck_set.start_cksum_offset, _threads[0].task_array[elkCurTaskID].ck_set.end_cksum_offset);
 #endif
 //NOTE: Step4 - checksum
 PRB_START(cksum)

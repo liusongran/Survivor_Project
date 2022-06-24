@@ -82,9 +82,9 @@ void __elk_first_cksum()
 
 void __elk_checksum(uint8_t taskID)
 {
-    ck_set_t tempCkSet = _threads[0].task_array[taskID].ck_set;
-    if(tempCkSet.end_backup_offset){
-        _elk_normal_cksum(tempCkSet.start_backup_offset, tempCkSet.end_backup_offset);
+    ck_set_t *tempCkSet = &_threads[0].task_array[taskID].ck_set;
+    if(tempCkSet->end_backup_offset){
+        _elk_normal_cksum(tempCkSet->start_cksum_offset, tempCkSet->end_cksum_offset);
     }
 }
 
