@@ -35,13 +35,13 @@ typedef struct {
 typedef struct {
     //uint16_t idxset_used_var;   //index of used vars for each task.
     //uint16_t idxset_wrt_var;    //index of write vars for each task.
-    uint16_t start_used_offset;                     //start used offset
-    uint16_t end_used_offset;                       //end used offset
+    uint16_t start_cksum_offset;                     //start checksum offset
+    uint16_t end_cksum_offset;                       //end checksum offset
     uint16_t start_verify_offset;                   //start verify
     uint16_t end_verify_offset;                     //end verify
-    uint16_t start_backup_offset;                   //start backup and checksum
-    uint16_t end_backup_offset;                     //end backup and checksum
-    uint16_t backup_size;                           //end backup and checksum
+    uint16_t start_backup_offset;                   //start backup
+    uint16_t end_backup_offset;                     //end backup
+    uint16_t backup_size;                           //end backup
 }ck_set_t;
 
 /** The main task structure for each Task. */
@@ -78,8 +78,8 @@ typedef uint8_t (*taskfun_t) (buffer_t *);
 //         __init_task(priority, (void *)&name, start_offset, end_offset)
 
 /** TASK structure init. */
-void __init_task(uint8_t priority, void *task_entry, uint16_t start_used_offset, uint16_t end_used_offset, uint16_t start_verify_offset, uint16_t end_verify_offset, uint16_t start_backup_offset, uint16_t end_backup_offset, uint16_t backup_size);
-#define TASK_INIT(priority, name, start_used_offset, end_used_offset, start_verify_offset, end_verify_offset, start_backup_offset, end_backup_offset, backup_size) \
+void __init_task(uint8_t priority, void *task_entry, uint16_t start_cksum_offset, uint16_t end_cksum_offset, uint16_t start_verify_offset, uint16_t end_verify_offset, uint16_t start_backup_offset, uint16_t end_backup_offset, uint16_t backup_size);
+#define TASK_INIT(priority, name, start_cksum_offset, end_cksum_offset, start_verify_offset, end_verify_offset, start_backup_offset, end_backup_offset, backup_size) \
         __init_task(priority, (void *)&name, start_used_offset, end_used_offset, start_verify_offset, end_verify_offset, start_backup_offset, end_backup_offset, backup_size)
 
 
