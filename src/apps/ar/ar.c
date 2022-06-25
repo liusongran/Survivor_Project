@@ -68,118 +68,11 @@ __shared(
     features_t _v_model_moving[MODEL_SIZE];     //-[15]:32*4 = 128  64*4 = 256  ----610
 )
 
-//MIN
-// redVerSum 234
-// redBakCksumSum 2144
-// Solution [13.  1.  8.  7. 12.  3.  9. 11. 10. 14. 15.  5.  2.  6.  4.]
-// [[0, 81], [0, 353], [4, 345], [0, 353]]
+// TASK(task_init){//-->0, NOTE: WAR,R() || W,WR,RAW(1,12,13)
+// TASK(task_selectMode){//-->1, NOTE: WAR,R(1,12) || W,WAR,RAW(1,2,3,4,5,6,9,10,11,12,13)
+// TASK(task_sample){//-->2, NOTE: WAR,R(9,10,11,12,14,15) || W,WAR,RAW(3,7,8,9,12)
+// TASK(task_idle){//-->4, NOTE: WAR,R(13) || W,WAR,RAW(4)
 
-//__shared(
-//    unsigned _v_count;                          //-[13]:2
-//    uint16_t _v_pinState;                       //-[1]:2
-//    features_t _v_features;                     //-[8]:4
-//    accelReading _v_window[ACCEL_WINDOW_SIZE];  //-[7]:12
-//    unsigned _v_seed;                           //-[12]:2
-//    class_t _v_class;                           //-[3]:
-//    unsigned _v_trainingSetSize;                //-[9]:2
-//    run_mode_t _v_mode;                         //-[11]:4
-//    unsigned _v_samplesInWindow;                //-[10]:2
-//    features_t _v_model_stationary[MODEL_SIZE]; //-[14]:64
-//    features_t _v_model_moving[MODEL_SIZE];     //-[15]:64
-//    unsigned _v_movingCount;                    //-[5]:2
-//    unsigned _v_discardedSamplesCount;          //-[2]:2
-//    unsigned _v_stationaryCount;                //-[6]:2
-//    unsigned _v_totalCount;                     //-[4]:2
-//)
-
-//MAX
-// redVerSum 20756
-// redBakCksumSum 125436
-// Solution [12.  5. 14.  4. 13.  9.  7. 11.  6.  8.  2. 15.  1. 10.  3.]
-// [[0, 351], [0, 353], [0, 353], [132, 135]]
-
-// __shared(
-//     unsigned _v_seed;                           //-[12]:2
-//     unsigned _v_movingCount;                    //-[5]:2
-//     features_t _v_model_stationary[MODEL_SIZE]; //-[14]:64
-//     unsigned _v_totalCount;                     //-[4]:2
-//     unsigned _v_count;                          //-[13]:2
-//     unsigned _v_trainingSetSize;                //-[9]:2
-//     accelReading _v_window[ACCEL_WINDOW_SIZE];  //-[7]:12
-//     run_mode_t _v_mode;                         //-[11]:4
-//     unsigned _v_stationaryCount;                //-[6]:2
-//     features_t _v_features;                     //-[8]:4
-//     unsigned _v_discardedSamplesCount;          //-[2]:2
-//     features_t _v_model_moving[MODEL_SIZE];     //-[15]:64
-//     uint16_t _v_pinState;                       //-[1]:2
-//     unsigned _v_samplesInWindow;                //-[10]:2
-//     class_t _v_class;                           //-[3]:
-// )
-
-//MAX2
-//redVerSum 20756
-//redBakCksumSum 125436
-//Solution [12.  4. 14.  3. 11.  5.  7.  8.  6. 13. 10. 15.  2.  1.  9.]
-//__shared(
-//    unsigned _v_seed;                           //-[12]:2
-//    unsigned _v_totalCount;                     //-[4]:2
-//    features_t _v_model_stationary[MODEL_SIZE]; //-[14]:64
-//    class_t _v_class;                           //-[3]:
-//    run_mode_t _v_mode;                         //-[11]:4
-//    unsigned _v_movingCount;                    //-[5]:2
-//    accelReading _v_window[ACCEL_WINDOW_SIZE];  //-[7]:12
-//    features_t _v_features;                     //-[8]:4
-//    unsigned _v_stationaryCount;                //-[6]:2
-//    unsigned _v_count;                          //-[13]:2
-//    unsigned _v_samplesInWindow;                //-[10]:2
-//    features_t _v_model_moving[MODEL_SIZE];     //-[15]:64
-//    unsigned _v_discardedSamplesCount;          //-[2]:2
-//    uint16_t _v_pinState;                       //-[1]:2
-//    unsigned _v_trainingSetSize;                //-[9]:2
-//)
-
-//MIN-interval
-// redAcessSum 4032
-// IntervalNum 2
-// totalResult 14.569060773480663
-//Solution [12.  7.  2.  5.  9.  1. 14. 15. 11.  6.  8. 10.  4. 13.  3.]
-//__shared(
-//    unsigned _v_seed;                           //-[12]:2
-//    accelReading _v_window[ACCEL_WINDOW_SIZE];  //-[7]:12
-//    unsigned _v_discardedSamplesCount;          //-[2]:2
-//    unsigned _v_movingCount;                    //-[5]:2
-//    unsigned _v_trainingSetSize;                //-[9]:2
-//    uint16_t _v_pinState;                       //-[1]:2
-//    features_t _v_model_stationary[MODEL_SIZE]; //-[14]:64
-//    features_t _v_model_moving[MODEL_SIZE];     //-[15]:64
-//    run_mode_t _v_mode;                         //-[11]:4
-//    unsigned _v_stationaryCount;                //-[6]:2
-//    features_t _v_features;                     //-[8]:4
-//    unsigned _v_samplesInWindow;                //-[10]:2
-//    unsigned _v_totalCount;                     //-[4]:2
-//    unsigned _v_count;                          //-[13]:2
-//    class_t _v_class;                           //-[3]:
-//)
-
-//MAX-interval
-//Solution [ 5.  9. 12. 13. 11. 14. 10.  3. 15.  7.  2.  1.  4.  6.  8.]
-//__shared(
-//    unsigned _v_movingCount;                    //-[5]:2
-//    unsigned _v_trainingSetSize;                //-[9]:2
-//    unsigned _v_seed;                           //-[12]:2
-//    unsigned _v_count;                          //-[13]:2
-//    run_mode_t _v_mode;                         //-[11]:4
-//    features_t _v_model_stationary[MODEL_SIZE]; //-[14]:64
-//    unsigned _v_samplesInWindow;                //-[10]:2
-//    class_t _v_class;                           //-[3]:
-//    features_t _v_model_moving[MODEL_SIZE];     //-[15]:64
-//    accelReading _v_window[ACCEL_WINDOW_SIZE];  //-[7]:12
-//    unsigned _v_discardedSamplesCount;          //-[2]:2
-//    uint16_t _v_pinState;                       //-[1]:2
-//    unsigned _v_totalCount;                     //-[4]:2
-//    unsigned _v_stationaryCount;                //-[6]:2
-//    features_t _v_features;                     //-[8]:4
-//)
 /**
  * 3. TASK definition here.
  */
@@ -455,205 +348,31 @@ void _benchmark_ar_init() {
     if (!nvInited) {
         __THREAD(0);
 
-        
-        //        |APP num:1.
-        //        |InitSum:0(100us)
-        //        |BackupSum:92(100us)
-        //        |CksumSum:333(100us)
-        //        |UpdateSum:201(100us)
-        //        |TaskSum:2365(100us), num:231.
-        //        |VerifySum:105(100us)
-        //        |Total:3097(100us)
-        //         TASK_INIT(0, task_init,             0,      353,     0,       0,     0,     97,     98);  //0
-        //         TASK_INIT(0, task_selectMode,       0,      353,     0,      95,     0,     97,     98);  //1
-        //         TASK_INIT(0, task_sample,           0,      353,    38,     353,     0,     97,     98);
-        //         TASK_INIT(0, task_idle,             0,      353,    96,      97,     0,      5,      2);   //10
-                 
-                 //        |APP num:1.
-                 //        |InitSum:0(100us)
-                 //        |BackupSum:129(100us)
-                 //        |CksumSum:439(100us)
-                 //        |UpdateSum:170(100us)
-                 //        |TaskSum:2361(100us), num:231.
-                 //        |VerifySum:78(100us)
-                 //        |Total:3179(100us)
-                 //         TASK_INIT(0, task_init,             0,      353,     0,       0,     0,     353,     354);  //0
-                 //         TASK_INIT(0, task_selectMode,       0,      353,     0,      95,     0,     353,     354);  //1
-                 //         TASK_INIT(0, task_sample,           0,      353,    38,     353,     0,     353,     354);
-                 //         TASK_INIT(0, task_idle,             0,      353,    96,      97,     0,     353,     354);   //10
-        
-        // |APP num:1.
-        // |InitSum:0(100us)
-        // |BackupSum:97(100us)
-        // |CksumSum:394(100us)
-        // |UpdateSum:184(100us)
-        // |TaskSum:2356(100us), num:231.
-        // |VerifySum:68(100us)
-        // |Total:3101(100us)
- //        TASK_INIT(0, task_init,             0,  121);         //0
- //        TASK_INIT(0, task_selectMode,       0, 161);          //1
- //        TASK_INIT(0, task_sample,           38,  353);
- //        TASK_INIT(0, task_idle,             0,  0);          //10
-        
-        // |APP num:1.
-        // |InitSum:0(100us)
-        // |BackupSum:92(100us)
-        // |CksumSum:345(100us)
-        // |UpdateSum:221(100us)
-        // |TaskSum:2365(100us), num:231.
-        // |VerifySum:119(100us)
-        // |Total:3144(100us)
-         // TASK_INIT(0, task_init,             0,      97,     0,      0,      0,     97,     98);  //0
-         // TASK_INIT(0, task_selectMode,       0,      97,     0,      95,     0,     97,     98);  //1
-         // TASK_INIT(0, task_sample,           4,      353,    38,     353,    4,     97,     94);
-         // TASK_INIT(0, task_idle,             4,      97,     96,     97,     4,     5,      2);   //10
-        
-        
 //        |APP num:1.
 //        |InitSum:0(100us)
-//        |BackupSum:105(100us)
-//        |CksumSum:394(100us)
-//        |UpdateSum:252(100us)
+//        |BackupSum:112(100us)
+//        |CksumSum:369(100us)
+//        |UpdateSum:240(100us)
+//        |TaskSum:3629(100us), num:263.
+//        |VerifySum:146(100us)
+//        |Total:4499(100us)
+//        TASK_INIT(0, task_init,             0,       97,    0,      97,      0,      0,      0,     97,     98);  //0
+//        TASK_INIT(0, task_selectMode,       0,       97,    0,      97,      0,      95,     0,     97,     98);  //1
+//        TASK_INIT(0, task_sample,           4,      609,    4,      97,     38,     609,     4,     97,     94);
+//        TASK_INIT(0, task_idle,             4,       97,    4,       5,     96,      97,     4,     5,      2);   //10
+
+//        |APP num:1.
+//        |InitSum:0(100us)
+//        |BackupSum:199(100us)
+//        |CksumSum:367(100us)
+//        |UpdateSum:261(100us)
 //        |TaskSum:3635(100us), num:263.
-//        |VerifySum:135(100us)
-//        |Total:4523(100us)
-//         TASK_INIT(0, task_init,             0,      97,     0,      0,      0,     97,     98);  //0
-//         TASK_INIT(0, task_selectMode,       0,      97,     0,      95,     0,     97,     98);  //1
-//         TASK_INIT(0, task_sample,           4,      609,    38,     609,    4,     97,     94);
-//         TASK_INIT(0, task_idle,             4,      97,     96,     97,     4,     5,      2);   //10
-
-//        |APP num:1.
-//        |InitSum:0(100us)
-//        |BackupSum:105(100us)
-//        |CksumSum:381(100us)
-//        |UpdateSum:229(100us)
-//        |TaskSum:3635(100us), num:263.
-//        |VerifySum:120(100us)
-//        |Total:4472(100us)
-//        TASK_INIT(0, task_init,             0,      609,     0,       0,     0,     97,     98);  //0
-//        TASK_INIT(0, task_selectMode,       0,      609,     0,      95,     0,     97,     98);  //1
-//        TASK_INIT(0, task_sample,           0,      609,    38,     609,     0,     97,     98);
-//        TASK_INIT(0, task_idle,             0,      609,    96,      97,     4,     5,       2);   //10
-
-        TASK_INIT(0, task_init,             0,      609,     0,       609,     0,     609,     610);  //0
-        TASK_INIT(0, task_selectMode,       0,      609,     0,      609,     0,     609,     610);  //1
-        TASK_INIT(0, task_sample,           0,      609,    0,     609,     0,     609,     610);
-        TASK_INIT(0, task_idle,             0,      609,    0,      609,     0,     609,       610);   //10
-
-
-//        |APP num:1.
-//        |InitSum:0(100us)
-//        |BackupSum:189(100us)
-//        |CksumSum:731(100us)
-//        |UpdateSum:194(100us)
-//        |TaskSum:3630(100us), num:263.
-//        |VerifySum:89(100us)
-//        |Total:4835(100us)
-//         TASK_INIT(0, task_init,             0,      609,     0,       0,     0,     609,     609);  //0
-//         TASK_INIT(0, task_selectMode,       0,      609,     0,      95,     0,     609,     609);  //1
-//         TASK_INIT(0, task_sample,           0,      609,    38,     609,     0,     609,     609);
-//         TASK_INIT(0, task_idle,             0,      609,    96,      97,     0,     609,     609);   //10
-//
-
-
-
-       // MIN [[0, 81], [0, 353], [4, 345], [0, 353]]
-       // |APP num:1.
-       // |InitSum:0(100us)
-       // |BackupSum:97(100us)
-       // |CksumSum:418(100us)
-       // |UpdateSum:227(100us)
-       // |TaskSum:2363(100us), num:231.
-       // |VerifySum:69(100us)
-       // |Total:3174(100us)
-//        TASK_INIT(0, task_init,             0,  81);         //0
-//        TASK_INIT(0, task_selectMode,       0,  353);          //1
-//        TASK_INIT(0, task_sample,           4,  345);
-//        TASK_INIT(0, task_idle,             0,  353);          //10
-//
-       // MAX [[0, 351], [0, 353], [0, 353], [132, 135]]
-       // |APP num:1.
-       // |InitSum:0(100us)
-       // |BackupSum:97(100us)
-       // |CksumSum:415(100us)
-       // |UpdateSum:162(100us)
-       // |TaskSum:2363(100us), num:231.
-       // |VerifySum:54(100us)
-       // |Total:3092(100us)
-//        TASK_INIT(0, task_init,             0,      351);         //0
-//        TASK_INIT(0, task_selectMode,       0,      353);          //1
-//        TASK_INIT(0, task_sample,           0,      353);
-//        TASK_INIT(0, task_idle,             132,    135);          //10
-
-        // MAX2 [[0, 351], [0, 353], [0, 353], [2, 217]]
-        // |APP num:1.
-        // |InitSum:0(100us)
-        // |BackupSum:97(100us)
-        // |CksumSum:416(100us)
-        // |UpdateSum:162(100us)
-        // |TaskSum:2370(100us), num:231.
-        // |VerifySum:54(100us)
-        // |Total:3100(100us)
-//        TASK_INIT(0, task_init,             0,      351);         //0
-//        TASK_INIT(0, task_selectMode,       0,      353);          //1
-//        TASK_INIT(0, task_sample,           0,      353);
-//        TASK_INIT(0, task_idle,             2,      217);          //10
-
-        // MIN-interval [[0, 353], [0, 353], [0, 353], [350, 353]]
-        // |APP num:1.
-        // |InitSum:0(100us)
-        // |BackupSum:97(100us)
-        // |CksumSum:412(100us)
-        // |UpdateSum:180(100us)
-        // |TaskSum:2348(100us), num:231.
-        // |VerifySum:55(100us)
-        // |Total:3093(100us)
-//        TASK_INIT(0, task_init,             0,      353);         //0
-//        TASK_INIT(0, task_selectMode,       0,      353);          //1
-//        TASK_INIT(0, task_sample,           0,      353);
-//        TASK_INIT(0, task_idle,             350,    353);          //10
-//        |APP num:1.
-//        |InitSum:0(100us)
-//        |BackupSum:128(100us)
-//        |CksumSum:437(100us)
-//        |UpdateSum:180(100us)
-//        |TaskSum:2348(100us), num:231.
-//        |VerifySum:78(100us)
-//        |Total:3172(100us)
-//        TASK_INIT(0, task_init,             0,      353,     0,      353,      0,      353,     354);  //0
-//        TASK_INIT(0, task_selectMode,       0,      353,     0,      353,      0,      349,     350);  //1
-//        TASK_INIT(0, task_sample,           0,      353,     0,      353,      0,      353,     354);
-//        TASK_INIT(0, task_idle,             350,    353,     350,    353,      0,        0,       0);   //10
-//
-//        |APP num:1.
-//        |InitSum:0(100us)
-//        |BackupSum:131(100us)
-//        |CksumSum:442(100us)
-//        |UpdateSum:160(100us)
-//        |TaskSum:2339(100us), num:231.
-//        |VerifySum:80(100us)
-//        |Total:3154(100us)
-//        TASK_INIT(0, task_init,             0,      353,     0,      353,      0,      353,     354);  //0
-//        TASK_INIT(0, task_selectMode,       0,      353,     0,      353,      0,      353,     354);  //1
-//        TASK_INIT(0, task_sample,           0,      353,     0,      353,      0,      353,     354);
-//        TASK_INIT(0, task_idle,             0,      353,     0,      353,      0,      353,     354);   //10
-
-
-        // MAX-interval [[4, 345], [0, 349], [2, 353], [6, 347]]
-        // |APP num:1.
-        // |InitSum:0(100us)
-        // |BackupSum:97(100us)
-        // |CksumSum:427(100us)
-        // |UpdateSum:204(100us)
-        // |TaskSum:2367(100us), num:231.
-        // |VerifySum:69(100us)
-        // |Total:3166(100us)
-//        TASK_INIT(0, task_init,             4,      345);         //0
-//        TASK_INIT(0, task_selectMode,       0,      349);          //1
-//        TASK_INIT(0, task_sample,           2,      353);
-//        TASK_INIT(0, task_idle,             6,      347);          //10
-
-
+//        |VerifySum:146(100us)
+//        |Total:4609(100us)
+        TASK_INIT(0, task_init,             0,       97,    0,      97,      0,      0,      0,     609,     610);  //0
+        TASK_INIT(0, task_selectMode,       0,       97,    0,      97,      0,      95,     0,     609,     610);  //1
+        TASK_INIT(0, task_sample,           4,      609,    4,      97,     38,     609,     0,     609,     610);
+        TASK_INIT(0, task_idle,             4,       97,    4,       5,     96,      97,     0,     609,     610);   //10
 
     } else {
 #ifdef ELK
