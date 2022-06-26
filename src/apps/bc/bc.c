@@ -72,50 +72,30 @@ TASK(end);                  //-(9)
 /**
  * 2. Shared variable declaration here. (22 bytes)
  */
-//__shared(
-//    unsigned _v_n_0;            //-[1]:2
-//    unsigned _v_n_1;            //-[2]:2
-//    unsigned _v_n_2;            //-[3]:2
-//    unsigned _v_n_3;            //-[4]:2
-//    unsigned _v_n_4;            //-[5]:2
-//    unsigned _v_n_5;            //-[6]:2
-//    unsigned _v_n_6;            //-[7]:2
-//    unsigned _v_func;           //-[8]:2 --16
-//    uint32_t _v_seed;           //-[9]:4
-//    uint64_t _v_iter;           //-[10]:8 --28
-//)
-
-//redVerSum 0
-//redBakCksumSum 696
-//Solution [ 8.  1.  7.  5. 10.  9.  3.  2.  4.  6.]
 __shared(
-    unsigned _v_func;           //-[8]:2 --16
-    unsigned _v_n_0;            //-[1]:2
-    unsigned _v_n_6;            //-[7]:2
-    unsigned _v_n_4;            //-[5]:2
-    uint64_t _v_iter;           //-[10]:8 --28
-    uint32_t _v_seed;           //-[9]:4
-    unsigned _v_n_2;            //-[3]:2
-    unsigned _v_n_1;            //-[2]:2
-    unsigned _v_n_3;            //-[4]:2
-    unsigned _v_n_5;            //-[6]:2
+        unsigned _v_n_0;            //-[1]:2
+        unsigned _v_n_1;            //-[2]:2
+        unsigned _v_n_2;            //-[3]:2
+        unsigned _v_n_3;            //-[4]:2
+        unsigned _v_n_4;            //-[5]:2
+        unsigned _v_n_5;            //-[6]:2
+        unsigned _v_n_6;            //-[7]:2
+        unsigned _v_func;           //-[8]:2 --16
+        uint32_t _v_seed;           //-[9]:4
+        uint64_t _v_iter;           //-[10]:8 --28
 )
 
-//redVerSum 896
-//redBakCksumSum 2024
-//Solution [10.  2.  4.  5.  3.  7.  1.  8.  6.  9.]
-//__shared(
-//    uint64_t _v_iter;           //-[10]:8 --28
-//    unsigned _v_n_1;            //-[2]:2
-//    unsigned _v_n_3;            //-[4]:2
-//    unsigned _v_n_4;            //-[5]:2
-//    unsigned _v_n_2;            //-[3]:2
-//    unsigned _v_n_6;            //-[7]:2
-//    unsigned _v_n_0;            //-[1]:2
-//    unsigned _v_func;           //-[8]:2 --16
-//    unsigned _v_n_5;            //-[6]:2
-//    uint32_t _v_seed;           //-[9]:4
-//)
+//TASK(init) NOTE: [R-or-RW() || RW-or-W-or-WR(1,2,3,4,5,6,7,8)]
+//TASK(select_func) NOTE: [R-or-RW(8) || RW-or-W-or-WR(8,9,10)]
+//TASK(bit_count) NOTE: [R-or-RW(9,10) || RW-or-W-or-WR(1,9,10)]
+//TASK(bitcount) NOTE: [R-or-RW(9,10) || RW-or-W-or-WR(2,9,10)]
+//TASK(ntbl_bitcnt) NOTE: [R-or-RW(9,10) || RW-or-W-or-WR(3,9,10)]
+//TASK(ntbl_bitcount) NOTE: [R-or-RW(9,10) || RW-or-W-or-WR(4,9,10)]
+//TASK(BW_btbl_bitcount) NOTE: [R-or-RW(9,10) || RW-or-W-or-WR(5,9,10)]
+//TASK(AR_btbl_bitcount) NOTE: [R-or-RW(9,10) || RW-or-W-or-WR(6,9,10)]
+//TASK(bit_shifter) NOTE: [R-or-RW(9,10) || RW-or-W-or-WR(7,9,10)]
+//TASK(end) NOTE: [R-or-RW() || RW-or-W-or-WR()]
+
 
 /**
  * 3. TASK definition here.
@@ -364,37 +344,26 @@ void _benchmark_bc_init(void) {
     if (!nvInited) {
         __THREAD(0);
 
-        // MIN:[[0, 27], [0, 19], [2, 19], [8, 23], [8, 21], [8, 25], [6, 19], [8, 27], [4, 19], [0, 0]]
-        TASK_INIT(0,    init,               0,  27);
-        TASK_INIT(0,    select_func,        0,  19);
-        TASK_INIT(0,    bit_count,          2,  19);
-        TASK_INIT(0,    bitcount,           8,  23);
-        TASK_INIT(0,    ntbl_bitcnt,        8,  21);
-        TASK_INIT(0,    ntbl_bitcount,      8,  25);
-        TASK_INIT(0,    BW_btbl_bitcount,   6,  19);
-        TASK_INIT(0,    AR_btbl_bitcount,   8,  27);
-        TASK_INIT(0,    bit_shifter,        4,  19);
-        TASK_INIT(0,    end,                0,  0);
+        TASK_INIT(0,    init,               0,  15,  0,  15,  0,  0,  0,  15, 16);
+        TASK_INIT(0,    select_func,       14,  27, 16,  27, 14, 15, 16,  27, 12);
+        TASK_INIT(0,    bit_count,          2,  27,  2,  27, 16, 27,  2,  27, 26);
+        TASK_INIT(0,    bitcount,           4,  27,  4,  27, 16, 27,  4,  27, 24);
+        TASK_INIT(0,    ntbl_bitcnt,        6,  27,  6,  27, 16, 27,  6,  27, 22);
+        TASK_INIT(0,    ntbl_bitcount,      8,  27,  8,  27, 16, 27,  8,  27, 20);
+        TASK_INIT(0,    BW_btbl_bitcount,  10,  27, 10,  27, 16, 27, 10,  27, 18);
+        TASK_INIT(0,    AR_btbl_bitcount,  12,  27, 12,  27, 16, 27, 12,  27, 16);
+        TASK_INIT(0,    bit_shifter,       14,  27, 14,  27, 16, 27, 14,  27, 14);
+        TASK_INIT(0,    end,                0,   0,  0,   0,  0,  0,  0,   0,  0);
 
-        // MAX:[[8, 23], [0, 27], [0, 27], [0, 27], [0, 27], [0, 27], [0, 27], [0, 27], [0, 27], [0, 0]]
-        //    |APP num:1.
-        //    |InitSum:0(100us)
-        //    |BackupSum:29(100us)
-        //    |CksumSum:91(100us)
-        //    |UpdateSum:119(100us)
-        //    |TaskSum:1011(100us), num:122.
-        //    |VerifySum:34(100us)
-        //    |Total:1287(100us)
-        //
-//        TASK_INIT(0,    init,               8,  23);
-//        TASK_INIT(0,    select_func,        0,  27);
-//        TASK_INIT(0,    bit_count,          0,  27);
-//        TASK_INIT(0,    bitcount,           0,  27);
-//        TASK_INIT(0,    ntbl_bitcnt,        0,  27);
-//        TASK_INIT(0,    ntbl_bitcount,      0,  27);
-//        TASK_INIT(0,    BW_btbl_bitcount,   0,  27);
-//        TASK_INIT(0,    AR_btbl_bitcount,   0,  27);
-//        TASK_INIT(0,    bit_shifter,        0,  27);
+//        TASK_INIT(0,    init,               0,  27);
+//        TASK_INIT(0,    select_func,        0,  19);
+//        TASK_INIT(0,    bit_count,          2,  19);
+//        TASK_INIT(0,    bitcount,           8,  23);
+//        TASK_INIT(0,    ntbl_bitcnt,        8,  21);
+//        TASK_INIT(0,    ntbl_bitcount,      8,  25);
+//        TASK_INIT(0,    BW_btbl_bitcount,   6,  19);
+//        TASK_INIT(0,    AR_btbl_bitcount,   8,  27);
+//        TASK_INIT(0,    bit_shifter,        4,  19);
 //        TASK_INIT(0,    end,                0,  0);
 
     } else {

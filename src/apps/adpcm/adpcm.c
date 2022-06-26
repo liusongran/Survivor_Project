@@ -74,15 +74,26 @@ __nv uint16_t pcmdata1[DATASIZE] = {
                                         3,   1,   4,   6,   9,   5,  10,   8,  16,  20
 };
 
+//__shared(
+//uint16_t time;
+//struct adpcm_state coder_1_state, coder_2_state, decoder_state;
+////short pcmdata[DATASIZE];
+//char adpcmdata[DATASIZE / 2];
+//short pcmdata_2[DATASIZE];
+//)
+
 __shared(
-uint16_t time;
-struct adpcm_state coder_1_state, coder_2_state, decoder_state;
-//short pcmdata[DATASIZE];
-char adpcmdata[DATASIZE / 2];
-short pcmdata_2[DATASIZE];
+     uint16_t time;                        //[1]->2                --2
+     struct adpcm_state coder_1_state;     //[2]->2                --4
+     struct adpcm_state coder_2_state;     //[3]->2                --6
+     struct adpcm_state decoder_state;     //[4]->2                --8
+     char adpcmdata[DATASIZE / 2];         //[5]->1*DATASIZE/2=64  --72
+     short pcmdata_2[DATASIZE];            //[6]->1*DATASIZE=128   --200
 )
 
-
+// TASK(init) [R-or-RW(6) || RW-or-W-or-WR(1)]
+// TASK(coder) [R-or-RW(1,2,3,5) || RW-or-W-or-WR(1,3)]
+// TASK(decoder) [R-or-RW(1,4,5,6) || RW-or-W-or-WR(4)]
 TASK(init);
 TASK(coder);
 TASK(decoder);

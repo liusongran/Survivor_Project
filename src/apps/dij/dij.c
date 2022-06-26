@@ -31,41 +31,23 @@ TASK(task_done);                    //-(4)
 /**
  * 2. Shared variable declaration here. (714bytes)
  */
-//__shared(
-//    uint16_t deq_idx;               //-[2]:2
-//    uint16_t enq_idx;               //-[3]:2
-//    queue_t queue[Q_SIZE];          //-[1]:600  , 300
-//    uint16_t node_idx;              //-[4]:2
-//    uint16_t src_node;              //-[5]:2
-//    queue_t nearest_node;           //-[6]:6
-//    node_t node_list[N_NODES];      //-[7]:100  , 100 100
-//)
 
-//redVerSum 1484
-//redBakCksumSum 0
-//MinSolution [5. 3. 1. 2. 7. 6. 4.]
-//__shared(
-//    uint16_t src_node;              //-[5]:2
-//    uint16_t enq_idx;               //-[3]:2
-//    queue_t queue[Q_SIZE];          //-[1]:600  , 300
-//    uint16_t deq_idx;               //-[2]:2
-//    node_t node_list[N_NODES];      //-[7]:100  , 100 100
-//    queue_t nearest_node;           //-[6]:6
-//    uint16_t node_idx;              //-[4]:2
-//)
 
-//redVerSum 1512
-//redBakCksumSum 220
-//Solution [1. 5. 7. 6. 4. 2. 3.]
 __shared(
-    queue_t queue[Q_SIZE];          //-[1]:600  , 300
-    uint16_t src_node;              //-[5]:2
-    node_t node_list[N_NODES];      //-[7]:100  , 100 100
-    queue_t nearest_node;           //-[6]:6
+    uint16_t deq_idx;               //-[1]:2
+    uint16_t enq_idx;               //-[2]:2
+    queue_t queue[Q_SIZE];          //-[3]:6*Q_SIZE = 300
     uint16_t node_idx;              //-[4]:2
-    uint16_t deq_idx;               //-[2]:2
-    uint16_t enq_idx;               //-[3]:2
+    uint16_t src_node;              //-[5]:2
+    queue_t nearest_node;           //-[6]:6
+    node_t node_list[N_NODES];      //-[7]:4*N_NODES = 100
 )
+
+//TASK(task_init) {//-->0, NOTE: [R-or-RW(5) || RW-or-W-or-WR(1,2,3)]
+//TASK(task_init_list){//-->1, NOTE: [R-or-RW(1,2,3,5) || RW-or-W-or-WR(1,2,3,4,5,6,7)]
+//TASK(task_done){//--> 4, NOTE: [R-or-RW() || RW-or-W-or-WR()]
+
+
 /**
  * 3. TASK definition here.
  */

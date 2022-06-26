@@ -55,23 +55,29 @@ TASK(done);
 /**
  * 2. Shared variable declaration here. (206 bytes)
  */
+
 __shared(
-uint32_t _v_counter;
-//index_t _v_index;                       //-[2]:
-value_t _v_key;                         //-[3]:
-void* _v_next_task;                     //-[4]:
-fingerprint_t _v_fingerprint;           //-[5]:
-value_t _v_index1;                      //-[6]:
-value_t _v_index2;                      //-[7]:
-value_t _v_relocation_count;            //-[8]:
-value_t _v_insert_count;                //-[9]:
-value_t _v_inserted_count;              //-[10]:
-value_t _v_lookup_count;                //-[11]:
-value_t _v_member_count;                //-[12]:
-bool _v_success;                        //-[13]:
-bool _v_member;                         //-[14]:
-fingerprint_t _v_filter[NUM_BUCKETS];   //-[1]:256
+    uint32_t _v_counter;                    //-[1]: 4
+    value_t _v_key;                         //-[2]: 2
+    void* _v_next_task;                     //-[3]: 4 --10
+    fingerprint_t _v_fingerprint;           //-[4]: 2
+    value_t _v_index1;                      //-[5]: 2
+    value_t _v_index2;                      //-[6]: 2
+    value_t _v_relocation_count;            //-[7]: 2
+    value_t _v_insert_count;                //-[8]: 2 --20
+    value_t _v_inserted_count;              //-[9]: 2
+    value_t _v_lookup_count;                //-[10]: 2
+    value_t _v_member_count;                //-[11]: 2 --26
+    bool _v_success;                        //-[12]: 1
+    bool _v_member;                         //-[13]: 1 --28
+    fingerprint_t _v_filter[NUM_BUCKETS];   //-[14]: 2 * NUM_BUCKETS = 128  --256
 )
+
+//TASK(init) NOTE: [R-or-RW() || RW-or-W-or-WR(1,2,3,8,9,10,11,14)]
+//TASK(generate_key) NOTE: [R-or-RW(2,3) || RW-or-W-or-WR(1,2,3,4)]
+//TASK(calc_indexes_index_1) NOTE: [R-or-RW(2,3,4,11,13,14) || RW-or-W-or-WR(3,5,6,10,11,13)]
+//TASK(add) NOTE: [R-or-RW(4,5,6,9,14) || RW-or-W-or-WR(2,3,4,5,7,8,9,12,14)]
+//TASK(done) NOTE: [R-or-RW() || RW-or-W-or-WR()]
 
 //void * insert;
 

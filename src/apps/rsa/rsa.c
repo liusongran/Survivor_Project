@@ -26,33 +26,40 @@ TASK(decrypt_print);     //14
 /**
  * 2. Shared variable declaration here.
  */
+
 __shared(
-    long int p;         //1
-    long int q;         //2
-    long int t;         //3
-    long int k;         //4
-    long int j;         //5
-    long int i;         //6
-    long int flag;      //7
-    long int e[10];     //8
-    long int d[10];     //9
-    long int n;         //10
-    long int m[10];     //11
-    long int temp[10];  //12
-    long int en[10];    //13
-    long int en_pt;     //14
-    long int en_ct;     //15
-    long int en_key;    //16
-    long int en_k;      //17
-    long int en_cnt;    //18
-    long int en_j;      //19
-    long int de_pt;     //20
-    long int de_ct;     //21
-    long int de_key;    //22
-    long int de_k;      //23
-    long int de_cnt;    //24
-    long int de_j;      //25
+    long int p;             //[1]:4                         initTask,
+    long int q;             //[2]:4                         initTask
+    long int t;             //[3]:4                         initTask
+    long int k;             //[4]:4 -- 16                   initTask
+    long int j;             //[5]:4                         ce_1,
+    long int i;             //[6]:4                         initTask, ce_1
+    long int flag;          //[7]:4 -- 28                   initTask, ce_1
+    long int e[MSG_LEN];    //[8]:4*MSG_LEN = 40,           ce_1, encrypt_init
+    long int d[MSG_LEN];    //[9]:4*MSG_LEN = 40,           ce_1
+    long int n;             //[10]:4 -- 112                 initTask
+    long int m[MSG_LEN];    //[11]:4*MSG_LEN = 40 -- 152,   initTask, decrypt_inner_loop
+    long int temp[MSG_LEN]; //[12]:4*MSG_LEN = 40,          encrypt_init, decrypt_inner_loop
+    long int en[MSG_LEN];   //[13]:4*MSG_LEN = 40,          encrypt_init, decrypt_inner_loop
+    long int en_pt;         //[14]:4                        encrypt_init
+    long int en_ct;         //[15]:4                        encrypt_init,  decrypt_inner_loop
+    long int en_key;        //[16]:4 encrypt_init
+    long int en_k;          //[17]:4 encrypt_init
+    long int en_cnt;        //[18]:4 encrypt_init
+    long int en_j;          //[19]:4 encrypt_init
+    long int de_pt;         //[20]:4 decrypt_inner_loop
+    long int de_ct;         //[21]:4 decrypt_inner_loop
+    long int de_key;        //[22]:4 encrypt_init, decrypt_inner_loop
+    long int de_k;          //[23]:4 encrypt_init, decrypt_inner_loop
+    long int de_cnt;        //[24]:4 decrypt_inner_loop
+    long int de_j;          //[25]:4 encrypt_init, decrypt_inner_loop
 )
+
+//TASK(initTask){//-->0, NOTE: [R-or-RW() || RW-or-W-or-WR(1,2,3,4,6,7,10,11)]
+//TASK(ce_1){//-->1, NOTE: [R-or-RW(1,2,3,4) || RW-or-W-or-WR(4,5,6,7,8,9)]
+//TASK(encrypt_init){//-->2, NOTE: [R-or-RW(8,9,10,11,18) || RW-or-W-or-WR(13,14,16,17,18,19,22,23,25)]
+//TASK(decrypt_inner_loop){//-->4, NOTE: [R-or-RW(9,10,12,13,17,18,22,23,24,25) || RW-or-W-or-WR(11,12,13,15,20,21,22,23,24,25)]
+//TASK(decrypt_print){//-->4, NOTE: [R-or-RW() || RW-or-W-or-WR()]
 
 /**
  * 3. TASK definition here.

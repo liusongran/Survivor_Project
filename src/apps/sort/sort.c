@@ -14,11 +14,16 @@ TASK(task_finish);          //-(3)
  * 2. Shared variable declaration here. (206 bytes)
  */
 __shared(
-uint16_t array[LENGTH];     //-[1]:200
-uint16_t outer_idx;         //-[2]:2
-uint16_t inner_idx;         //-[3]:2
-uint16_t iteration;          //-[4]:2
-)
+    uint16_t array[LENGTH];     //-[1]:LENTH * 2 = 150
+    uint16_t outer_idx;         //-[2]:2
+    uint16_t inner_idx;         //-[3]:2
+    uint16_t iteration;         //-[4]:2
+}
+
+//TASK(task_setup){//---0  NOTE: WAR,R() || W,WR,RAW(4) 8us
+//TASK(task_init){//-->1, NOTE: WAR,R() || W,WR,RAW(1,2,3,4)
+//TASK(task_inner_loop){//-->2, NOTE: WAR,R(1,2,3) || W,WAR,RAW(1,2,3)
+//TASK(task_finish){//-->3, NOTE: WAR,R(4) || W,WAR,RAW()
 
 uint16_t in_i, in_j, arr_i, arr_j;
 

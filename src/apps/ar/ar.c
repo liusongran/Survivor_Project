@@ -9,7 +9,7 @@ unsigned _v_seed;
 // Number of samples to discard before recording training set
 #define NUM_WARMUP_SAMPLES 6
 #define ACCEL_WINDOW_SIZE 24
-#define MODEL_SIZE 64
+#define MODEL_SIZE 32
 #define SAMPLE_NOISE_FLOOR 10 // TODO: made up value
 
 // Number of classifications to complete in one experiment
@@ -50,6 +50,24 @@ TASK(task_idle);            //-(10)
 /**
  * 2. Shared variable declaration here. (164 bytes)
  */
+//__shared(
+//    uint16_t _v_pinState;                       //-[1]:2
+//    unsigned _v_discardedSamplesCount;          //-[2]:2
+//    class_t _v_class;                           //-[3]:
+//    unsigned _v_totalCount;                     //-[4]:2
+//    unsigned _v_movingCount;                    //-[5]:2
+//    unsigned _v_stationaryCount;                //-[6]:2
+//    accelReading _v_window[ACCEL_WINDOW_SIZE];  //-[7]:72
+//    features_t _v_features;                     //-[8]:4
+//    unsigned _v_trainingSetSize;                //-[9]:2
+//    unsigned _v_samplesInWindow;                //-[10]:2
+//    run_mode_t _v_mode;                         //-[11]:4
+//    unsigned _v_seed;                           //-[12]:2
+//    unsigned _v_count;                          //-[13]:2 ----98
+//    features_t _v_model_stationary[MODEL_SIZE]; //-[14]:32*4 = 128  64*4 = 256  ----354
+//    features_t _v_model_moving[MODEL_SIZE];     //-[15]:32*4 = 128  64*4 = 256  ----610
+//)
+
 __shared(
     uint16_t _v_pinState;                       //-[1]:2
     unsigned _v_discardedSamplesCount;          //-[2]:2
@@ -64,8 +82,8 @@ __shared(
     run_mode_t _v_mode;                         //-[11]:4
     unsigned _v_seed;                           //-[12]:2
     unsigned _v_count;                          //-[13]:2 ----98
-    features_t _v_model_stationary[MODEL_SIZE]; //-[14]:32*4 = 128  64*4 = 256  ----354
-    features_t _v_model_moving[MODEL_SIZE];     //-[15]:32*4 = 128  64*4 = 256  ----610
+    features_t _v_model_stationary[MODEL_SIZE]; //-[14]:32*4 = 128  64*4 = 256  ----226
+    features_t _v_model_moving[MODEL_SIZE];     //-[15]:32*4 = 128  64*4 = 256  ----354
 )
 
 // TASK(task_init){//-->0, NOTE: WAR,R() || W,WR,RAW(1,12,13)
@@ -356,10 +374,32 @@ void _benchmark_ar_init() {
 //        |TaskSum:3629(100us), num:263.
 //        |VerifySum:146(100us)
 //        |Total:4499(100us)
+
+//        if modify the 232-233 in src/kernel/elk_api.c
+//        |APP num:1.
+//        |InitSum:0(100us)
+//        |BackupSum:110(100us)
+//        |CksumSum:368(100us)
+//        |UpdateSum:252(100us)
+//        |TaskSum:3632(100us), num:263.
+//        |VerifySum:143(100us)
+//        |Total:4506(100us)
+//
+
+//        |APP num:1.
+//        |InitSum:0(100us)
+//        |BackupSum:110(100us)
+//        |CksumSum:368(100us)
+//        |UpdateSum:262(100us)
+//        |TaskSum:3632(100us), num:263.
+//        |VerifySum:143(100us)
+//        |Total:4517(100us)
 //        TASK_INIT(0, task_init,             0,       97,    0,      97,      0,      0,      0,     97,     98);  //0
 //        TASK_INIT(0, task_selectMode,       0,       97,    0,      97,      0,      95,     0,     97,     98);  //1
 //        TASK_INIT(0, task_sample,           4,      609,    4,      97,     38,     609,     4,     97,     94);
 //        TASK_INIT(0, task_idle,             4,       97,    4,       5,     96,      97,     4,     5,      2);   //10
+
+
 
 //        |APP num:1.
 //        |InitSum:0(100us)
@@ -369,10 +409,24 @@ void _benchmark_ar_init() {
 //        |TaskSum:3635(100us), num:263.
 //        |VerifySum:146(100us)
 //        |Total:4609(100us)
-        TASK_INIT(0, task_init,             0,       97,    0,      97,      0,      0,      0,     609,     610);  //0
-        TASK_INIT(0, task_selectMode,       0,       97,    0,      97,      0,      95,     0,     609,     610);  //1
-        TASK_INIT(0, task_sample,           4,      609,    4,      97,     38,     609,     0,     609,     610);
-        TASK_INIT(0, task_idle,             4,       97,    4,       5,     96,      97,     0,     609,     610);   //10
+//        TASK_INIT(0, task_init,             0,       97,    0,      97,      0,      0,      0,     609,     610);  //0
+//        TASK_INIT(0, task_selectMode,       0,       97,    0,      97,      0,      95,     0,     609,     610);  //1
+//        TASK_INIT(0, task_sample,           4,      609,    4,      97,     38,     609,     0,     609,     610);
+//        TASK_INIT(0, task_idle,             4,       97,    4,       5,     96,      97,     0,     609,     610);   //10
+
+//        |APP num:1.
+//        |InitSum:0(100us)
+//        |BackupSum:96(100us)
+//        |CksumSum:322(100us)
+//        |UpdateSum:221(100us)
+//        |TaskSum:2363(100us), num:231.
+//        |VerifySum:125(100us)
+//        |Total:3130(100us)
+        TASK_INIT(0, task_init,             0,       97,    0,      97,      0,       0,     0,     97,     98);  //0
+        TASK_INIT(0, task_selectMode,       0,       97,    0,      97,      0,      95,     0,     97,     98);  //1
+        TASK_INIT(0, task_sample,           4,      353,    4,      97,     38,     353,     4,     97,     94);
+        TASK_INIT(0, task_idle,             4,       97,    4,       5,     96,      97,     4,      5,      2);   //10
+
 
     } else {
 #ifdef ELK

@@ -59,8 +59,8 @@ const unsigned int CRC_Input[] = {
  * 2. Shared variable declaration here. (4 bytes)
  */
 __shared(
-unsigned int SW_Results;            //-[1]:2
-unsigned int cnt;                   //-[2]:2
+    unsigned int SW_Results;            //-[1]:2
+    unsigned int cnt;                   //-[2]:2
 )
 
 // Debug defines and flags

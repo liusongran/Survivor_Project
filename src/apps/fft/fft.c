@@ -113,13 +113,27 @@ _q15 fft_array_copy[N_SAMPLES];
 /*
  * 2. Shared variable declaration here. (206 bytes)
  */
+//__shared(
+//uint32_t iteration;
+//uint16_t fft_shift;
+//uint16_t fft_scale;
+//uint16_t fft_overflow;
+//_q15 fft_array[N_SAMPLES];
+//)
+
 __shared(
-uint32_t iteration;
-uint16_t fft_shift;
-uint16_t fft_scale;
-uint16_t fft_overflow;
-_q15 fft_array[N_SAMPLES];
+    uint32_t iteration;         //-[1]:1 * 4
+    uint16_t fft_shift;         //-[2]:1 * 2
+    uint16_t fft_scale;         //-[3]:1 * 2
+    uint16_t fft_overflow;      //-[4]:1 * 2
+    _q15 fft_array[N_SAMPLES];  //-[5]:N_SAMPLES * 2 = 256
 )
+
+//TASK(task_init) {//-->0, NOTE: [R-or-RW() || RW-or-W-or-WR(1,2)]
+//TASK(task_fft_prologue){//-->1, NOTE: [R-or-RW() || RW-or-W-or-WR(1,2,3,4,5)]
+//TASK(task_fft_stage_2){//-->2, NOTE: [R-or-RW(3,4,5) || RW-or-W-or-WR(2,3,4,5)]
+//TASK(task_fft_epilogue){//-->4, NOTE: [R-or-RW(5) || RW-or-W-or-WR(5)]
+//TASK(task_done){//-->4, NOTE: [R-or-RW(1) || RW-or-W-or-WR()]
 
 static _q15 get_sample(const _q15* ptr, uint16_t sample_idx)
 {

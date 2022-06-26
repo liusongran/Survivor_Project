@@ -51,57 +51,29 @@ TASK(add_node);
 TASK(append_compressed);
 TASK(done);  //10
 
-
-//redVerSum 0
-//redBakCksumSum 340
-//Solution [ 9. 11. 10. 13.  1.  8.  2.  4.  3.  7. 12.  5. 16.  6. 14. 15.]
-
-//# TASK(init) [R-or-RW() || RW-or-W-or-WR(2,3,4,5,6,8,12,16)]
-//# TASK(sample) [R-or-RW(3,4) || RW-or-W-or-WR(3,4,7)]
-//# TASK(letterize) [R-or-RW(3,5,6,7,12,14,16) || RW-or-W-or-WR(1,2,5,6,7,8,9,10,11,12,13,14,16)]
-//# TASK(done) [R-or-RW() || RW-or-W-or-WR()]
-
 __shared(
-    index_t _v_sibling;                     // -[9]:2                       --2
-    index_t _v_parent;                      // -[11]:2                      --4
-    index_t _v_child;                       // -[10]:2                      --6
-    node_t _v_parent_node;                  // -[13]:6                      --12
-    node_t _v_compressed_data[BLOCK_SIZE];  // -[1]:6*BLOCK_SIZE=6*32=192   --204
-    index_t _v_sample_count;                // -[8]:2                       --206
-    letter_t _v_letter;                     // -[2]:2                       --208
-    sample_t _v_prev_sample;                // -[4]:2                       --210
-    unsigned _v_letter_idx;                 // -[3]:1                       --211
-    sample_t _v_sample;                     // -[7]:2                       --213
-    index_t _v_parent_next;                 // -[12]:2                      --215
-    index_t _v_out_len;                     // -[5]:2                       --217
-    node_t _v_dict[DICT_SIZE];              // -[16]:6*DICT_SIZE=6*64=384   --601
-    index_t _v_node_count;                  // -[6]:2                       --603
-    node_t _v_sibling_node;                 // -[14]:6                      --609
-    index_t _v_symbol;                      // -[15]:2                      --611
+    node_t _v_compressed_data[BLOCK_SIZE];  // -[1]:6*BLOCK_SIZE=6*32=192
+    letter_t _v_letter;                     // -[2]:2
+    unsigned _v_letter_idx;                 // -[3]:1
+    sample_t _v_prev_sample;                // -[4]:2
+    index_t _v_out_len;                     // -[5]:2 --199
+    index_t _v_node_count;                  // -[6]:2
+    sample_t _v_sample;                     // -[7]:2 --203
+    index_t _v_sample_count;                // -[8]:2
+    index_t _v_sibling;                     // -[9]:2
+    index_t _v_child;                       // -[10]:2
+    index_t _v_parent;                      // -[11]:2
+    index_t _v_parent_next;                 // -[12]:2
+    node_t _v_parent_node;                  // -[13]:6
+    node_t _v_sibling_node;                 // -[14]:6
+    index_t _v_symbol;                      // -[15]:2 --227
+    node_t _v_dict[DICT_SIZE];              // -[16]:6*DICT_SIZE=6*64=384 --611
 )
 
-//redVerSum 11872
-//redBakCksumSum 984
-//Solution [ 3. 16. 14. 15.  1. 12.  6.  8.  2.  9. 11.  5. 13. 10.  4.  7.]
-//__shared(
-//    unsigned _v_letter_idx;                 // -[3]:1
-//    node_t _v_dict[DICT_SIZE];              // -[16]:6*DICT_SIZE=6*64=384 --611
-//    node_t _v_sibling_node;                 // -[14]:6
-//    index_t _v_symbol;                      // -[15]:2 --227
-//    node_t _v_compressed_data[BLOCK_SIZE];  // -[1]:6*BLOCK_SIZE=6*32=192
-//    index_t _v_parent_next;                 // -[12]:2
-//    index_t _v_node_count;                  // -[6]:2
-//    index_t _v_sample_count;                // -[8]:2
-//    letter_t _v_letter;                     // -[2]:2
-//    index_t _v_sibling;                     // -[9]:2
-//    index_t _v_parent;                      // -[11]:2
-//    index_t _v_out_len;                     // -[5]:2 --199
-//    node_t _v_parent_node;                  // -[13]:6
-//    index_t _v_child;                       // -[10]:2
-//    sample_t _v_prev_sample;                // -[4]:2
-//    sample_t _v_sample;                     // -[7]:2 --203
-//)
-
+//TASK(init) [R-or-RW() || RW-or-W-or-WR(2,3,4,5,6,8,12,16)]
+//TASK(sample) [R-or-RW(3,4) || RW-or-W-or-WR(3,4,7)]
+//TASK(letterize) [R-or-RW(3,5,6,7,12,14,16) || RW-or-W-or-WR(1,2,5,6,7,8,9,10,11,12,13,14,16)]
+//TASK(done) [R-or-RW() || RW-or-W-or-WR()]
 
 static sample_t acquire_sample(letter_t prev_sample) {
     letter_t sample = (prev_sample + 1) & 0x03;
@@ -523,39 +495,29 @@ TASK(done)//4
 }
 
 
-
 void _benchmark_cem_init(void)
 {
     __THREAD(0);
 
-    // min:[[204, 602], [208, 212], [0, 608], [0, 0]]
-
-
-
-    // max:[[0, 608], [0, 610], [0, 610], [0, 0]]
-    //    |APP num:1.
-    //    |InitSum:0(100us)
-    //    |BackupSum:55(100us)
-    //    |CksumSum:250(100us)
-    //    |UpdateSum:136(100us)
-    //    |TaskSum:84(100us), num:90.
-    //    |VerifySum:25(100us)
-    //    |Total:552(100us)
 
     //TASK_INIT(TASK_PRI,initTask,5,may_war_set_crc[0][0],may_war_set_crc[0][1],TASK_breaking_crc[0]);
 
-    TASK_INIT(TASK_PRI, init,                 204,  602);
-    //TASK_INIT(TASK_PRI,init_dict,            0,  1);
-    TASK_INIT(TASK_PRI, sample,               0,  610);
-    //TASK_INIT(TASK_PRI,measure_temp,         0,  1);
-    TASK_INIT(TASK_PRI, letterize,            0,  608);
-    //TASK_INIT(TASK_PRI,compress,             0,  1);
-    //TASK_INIT(TASK_PRI,find_sibling, 0,  1);
-    //TASK_INIT(TASK_PRI,add_node, 0,  1);
-    //TASK_INIT(TASK_PRI,add_insert, 0,  1);
-    //TASK_INIT(TASK_PRI,append_compressed, 0,  1);
-    //TASK_INIT(TASK_PRI,print, 1,may_war_set_cem[10][0],may_war_set_cem[10][1],TASK_breaking_cem[10]);
-    TASK_INIT(TASK_PRI, done, 0,  0);
+    TASK_INIT(TASK_PRI, init,         192,  610,  192,  610,    0,    0,  192,  610,  419);
+    TASK_INIT(TASK_PRI, sample,       194,  202,  194,  202,  194,  196,  194,  202,    9);
+    TASK_INIT(TASK_PRI, letterize,      0,  610,    0,  610,  194,  610,    0,  610,  611);
+    TASK_INIT(TASK_PRI, done,           0,    0,    0,    0,    0,    0,    0,    0,    0);
 
+//    TASK_INIT(TASK_PRI, init,                 204,  602);
+//    //TASK_INIT(TASK_PRI,init_dict,            0,  1);
+//    TASK_INIT(TASK_PRI, sample,               0,  610);
+//    //TASK_INIT(TASK_PRI,measure_temp,         0,  1);
+//    TASK_INIT(TASK_PRI, letterize,            0,  608);
+//    //TASK_INIT(TASK_PRI,compress,             0,  1);
+//    //TASK_INIT(TASK_PRI,find_sibling, 0,  1);
+//    //TASK_INIT(TASK_PRI,add_node, 0,  1);
+//    //TASK_INIT(TASK_PRI,add_insert, 0,  1);
+//    //TASK_INIT(TASK_PRI,append_compressed, 0,  1);
+//    //TASK_INIT(TASK_PRI,print, 1,may_war_set_cem[10][0],may_war_set_cem[10][1],TASK_breaking_cem[10]);
+//    TASK_INIT(TASK_PRI, done, 0,  0);
 }
 
