@@ -229,8 +229,8 @@ void __elk_init() {
     _elk_listInit(&elkDualList[1]);
 
     //Buffer-Idx init. Backup->0, Working->1
-    elkBufIdx.idx = 0;
-    elkBufIdx._idx = 1;
+    //elkBufIdx.idx = 0;
+    //elkBufIdx._idx = 1;
 
     //DualList-Idx init. Backup->0, Working->1
     elkDualIdx.idx = 0;
